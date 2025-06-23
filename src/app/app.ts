@@ -1,11 +1,14 @@
 import { Component } from '@angular/core';
 import { RouterOutlet } from '@angular/router';
+import { HomeComponent } from './home/home';
 
 @Component({
   selector: 'app-root',
-  imports: [RouterOutlet],
+  imports: [HomeComponent],
   templateUrl: './app.html',
-  styleUrl: './app.scss'
+  styleUrl: './app.scss',
+  standalone: true
+
 })
 export class App {
   protected title = 'lanContacto';
