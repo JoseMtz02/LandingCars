@@ -1,47 +1,47 @@
-<section class="min-h-screen bg-gray-900 flex items-center justify-center bg-cover bg-center py-20"
-    style="background-image: url('https://source.unsplash.com/1600x900/?truck')">
-    <div
-        class="bg-white bg-opacity-90 p-10 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 backdrop-blur-sm">
-        <h2 class="text-4xl font-extrabold mb-6 text-center text-gray-900 tracking-tight">¡Encuentra tu camioneta ideal!
-        </h2>
-        <p class="text-center text-gray-600 mb-10 font-medium text-lg">Déjanos tus datos y te contactaremos con las
-            mejores opciones personalizadas.</p>
-        <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-8">
-            <div>
-                <label for="fullName" class="block text-sm font-semibold text-gray-700">Nombre Completo</label>
-                <input id="fullName" formControlName="fullName" type="text"
-                    class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
-                    placeholder="Tu nombre completo">
-                <div *ngIf="contactForm.get('fullName')?.invalid && contactForm.get('fullName')?.touched"
-                    class="text-red-500 text-sm mt-2">El nombre es requerido (mínimo 3 caracteres).</div>
-            </div>
-            <div>
-                <label for="email" class="block text-sm font-semibold text-gray-700">Correo Electrónico</label>
-                <input id="email" formControlName="email" type="email"
-                    class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
-                    placeholder="tu@correo.com">
-                <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched"
-                    class="text-red-500 text-sm mt-2">Ingresa un correo electrónico válido.</div>
-            </div>
-            <div>
-                <label for="phone" class="block text-sm font-semibold text-gray-700">Teléfono</label>
-                <input id="phone" formControlName="phone" type="tel"
-                    class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
-                    placeholder="123-456-7890">
-                <div *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched"
-                    class="text-red-500 text-sm mt-2">Ingresa un teléfono válido (10 dígitos).</div>
-            </div>
-            <div>
-                <label for="message" class="block text-sm font-semibold text-gray-700">Mensaje</label>
-                <textarea id="message" formControlName="message"
-                    class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400 h-40 resize-y"
-                    placeholder="Cuéntanos qué tipo de camioneta buscas..."></textarea>
-                <div *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
-                    class="text-red-500 text-sm mt-2">El mensaje es requerido (mínimo 10 caracteres).</div>
-            </div>
-            <button type="submit" [disabled]="contactForm.invalid"
-                class="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 font-semibold text-lg">Contáctame</button>
-        </form>
-        <p *ngIf="message" class="mt-8 text-center text-green-600 font-medium text-lg">{{ message }}</p>
-    </div>
+<section class="min-h-screen bg-gray-600 flex items-center justify-center bg-cover bg-center py-20"
+  style="background-image: url('https://source.unsplash.com/1600x900/?truck')">
+  <div
+    class="bg-white bg-opacity-90 p-10 rounded-2xl shadow-2xl w-full max-w-2xl transform transition-all duration-300 backdrop-blur-sm">
+    <h2 class="text-4xl font-extrabold mb-6 text-center text-gray-900 tracking-tight">¡Encuentra tu camioneta ideal!
+    </h2>
+    <p class="text-center text-gray-600 mb-10 font-medium text-lg">Déjanos tus datos y te contactaremos con las
+      mejores opciones personalizadas.</p>
+    <form [formGroup]="contactForm" (ngSubmit)="onSubmit()" class="space-y-8">
+      <div>
+        <label for="fullName" class="block text-sm font-semibold text-gray-700">Nombre Completo</label>
+        <input id="fullName" formControlName="fullName" type="text"
+          class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+          placeholder="Tu nombre completo">
+        <div *ngIf="contactForm.get('fullName')?.invalid && contactForm.get('fullName')?.touched"
+          class="text-red-500 text-sm mt-2">El nombre es requerido (mínimo 3 caracteres).</div>
+      </div>
+      <div>
+        <label for="email" class="block text-sm font-semibold text-gray-700">Correo Electrónico</label>
+        <input id="email" formControlName="email" type="email"
+          class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+          placeholder="tu@correo.com">
+        <div *ngIf="contactForm.get('email')?.invalid && contactForm.get('email')?.touched"
+          class="text-red-500 text-sm mt-2">Ingresa un correo electrónico válido.</div>
+      </div>
+      <div>
+        <label for="phone" class="block text-sm font-semibold text-gray-700">Teléfono</label>
+        <input id="phone" formControlName="phone" type="tel"
+          class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
+          placeholder="123-456-7890">
+        <div *ngIf="contactForm.get('phone')?.invalid && contactForm.get('phone')?.touched"
+          class="text-red-500 text-sm mt-2">Ingresa un teléfono válido (10 dígitos).</div>
+      </div>
+      <div>
+        <label for="message" class="block text-sm font-semibold text-gray-700">Mensaje</label>
+        <textarea id="message" formControlName="message"
+          class="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400 h-40 resize-y"
+          placeholder="Cuéntanos qué tipo de camioneta buscas..."></textarea>
+        <div *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
+          class="text-red-500 text-sm mt-2">El mensaje es requerido (mínimo 10 caracteres).</div>
+      </div>
+      <button type="submit" [disabled]="contactForm.invalid"
+        class="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 font-semibold text-lg">Contáctame</button>
+    </form>
+    <p *ngIf="message" class="mt-8 text-center text-green-600 font-medium text-lg">{{ message }}</p>
+  </div>
 </section>
