@@ -3,9 +3,14 @@
     <h1 class="text-2xl font-semibold tracking-tight">Titan Motors</h1>
     <nav>
       <ul class="flex space-x-8">
-        <li><a href="#categories" class="text-lg font-medium hover:text-blue-400 transition duration-200">Categorías</a>
+        <li>
+          <button (click)="goTo('categories')"
+            class="text-lg font-medium hover:text-blue-400 transition duration-200">Categorías</button>
         </li>
-        <li><a href="#contact" class="text-lg font-medium hover:text-blue-400 transition duration-200">Contacto</a></li>
+        <li>
+          <button (click)="goTo('contact')"
+            class="text-lg font-medium hover:text-blue-400 transition duration-200">Contacto</button>
+        </li>
       </ul>
     </nav>
   </div>
@@ -18,12 +23,10 @@
       <div class="absolute inset-0 bg-black opacity-80"></div>
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="text-center px-4 max-w-2xl">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Compactas
-          </h2>
-          <p class="text-base md:text-lg text-gray-200">Ágiles y perfectas para moverte con facilidad en la
-            ciudad.</p>
-          <a href="#contact"
-            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</a>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Compactas</h2>
+          <p class="text-base md:text-lg text-gray-200">Ágiles y perfectas para moverte con facilidad en la ciudad.</p>
+          <button (click)="goTo('contact')"
+            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</button>
         </div>
       </div>
     </div>
@@ -32,26 +35,24 @@
       <div class="absolute inset-0 bg-black opacity-80"></div>
       <div class="absolute inset-0 flex items-center justify-center">
         <div class="text-center px-4 max-w-2xl">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Medianas
-          </h2>
-          <p class="text-base md:text-lg text-gray-200">Espaciosas e ideales para familias y aventuras al aire
-            libre.</p>
-          <a href="#contact"
-            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</a>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Medianas</h2>
+          <p class="text-base md:text-lg text-gray-200">Espaciosas e ideales para familias y aventuras al aire libre.
+          </p>
+          <button (click)="goTo('contact')"
+            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</button>
         </div>
       </div>
     </div>
     <div class="relative rounded-xl overflow-hidden h-[400px] md:h-[500px] lg:h-[600px] bg-cover bg-center"
       style="background-image: url('/camionetas/3.png')">
       <div class="absolute inset-0 bg-black opacity-80"></div>
-      <div class="absolute inset-0  flex items-center justify-center">
+      <div class="absolute inset-0 flex items-center justify-center">
         <div class="text-center px-4 max-w-2xl">
-          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Grandes
-          </h2>
-          <p class="text-base md:text-lg text-gray-200">Potentes y robustas para trabajos pesados y máxima
-            capacidad.</p>
-          <a href="#contact"
-            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</a>
+          <h2 class="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">Camionetas Grandes</h2>
+          <p class="text-base md:text-lg text-gray-200">Potentes y robustas para trabajos pesados y máxima capacidad.
+          </p>
+          <button (click)="goTo('contact')"
+            class="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold">Contáctanos</button>
         </div>
       </div>
     </div>
@@ -66,26 +67,26 @@
         class="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
         <img src="/camionetas/cats/1.jpeg" alt="Compacta" class="w-full h-56 object-cover rounded-lg mb-6">
         <h3 class="text-2xl font-semibold text-gray-900 mb-2">Compactas</h3>
-        <p class="text-gray-600">Ideales para la ciudad, ágiles y económicas. Perfectas para quienes buscan
-          eficiencia.</p>
-        <a href="#contact" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
-          información</a>
+        <p class="text-gray-600">Ideales para la ciudad, ágiles y económicas. Perfectas para quienes buscan eficiencia.
+        </p>
+        <button (click)="goTo('contact')" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
+          información</button>
       </div>
       <div
         class="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
         <img src="/camionetas/cats/2.jpeg" alt="Mediana" class="w-full h-56 object-cover rounded-lg mb-6">
         <h3 class="text-2xl font-semibold text-gray-900 mb-2">Medianas</h3>
         <p class="text-gray-600">Espaciosas y versátiles, ideales para familias y escapadas al aire libre.</p>
-        <a href="#contact" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
-          información</a>
+        <button (click)="goTo('contact')" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
+          información</button>
       </div>
       <div
         class="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
         <img src="/camionetas/cats/3.jpg" alt="Grande" class="w-full h-56 object-cover rounded-lg mb-6">
         <h3 class="text-2xl font-semibold text-gray-900 mb-2">Grandes</h3>
         <p class="text-gray-600">Robustas y potentes, diseñadas para trabajos pesados y máxima capacidad.</p>
-        <a href="#contact" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
-          información</a>
+        <button (click)="goTo('contact')" class="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800">Más
+          información</button>
       </div>
     </div>
   </div>
@@ -106,9 +107,10 @@
       <div>
         <h3 class="text-xl font-semibold mb-4">Enlaces Rápidos</h3>
         <ul class="space-y-2">
-          <li><a href="#categories" class="text-gray-400 hover:text-blue-400 transition duration-200">Categorías</a>
-          </li>
-          <li><a href="#contact" class="text-gray-400 hover:text-blue-400 transition duration-200">Contacto</a></li>
+          <li><button (click)="goTo('categories')"
+              class="text-gray-400 hover:text-blue-400 transition duration-200">Categorías</button></li>
+          <li><button (click)="goTo('contact')"
+              class="text-gray-400 hover:text-blue-400 transition duration-200">Contacto</button></li>
         </ul>
       </div>
       <div>

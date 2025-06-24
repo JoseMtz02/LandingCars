@@ -39,6 +39,12 @@
         <div *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
           class="text-red-500 text-sm mt-2">El mensaje es requerido (mínimo 10 caracteres).</div>
       </div>
+      <div>
+        <input type="checkbox" id="condiciones" formControlName="condiciones" />
+        <label for="condiciones" class="ml-2">Acepto los </label>
+        <a href="/terminos" class="enlace-terminos text-blue-400">Términos y Condiciones</a>
+        y <a href="/aviso" class="text-blue-400">Aviso de Privacidad</a>
+      </div>
 
       <re-captcha formControlName="recaptcha" siteKey="6Ld8Z2srAAAAAC-LdwLTVr7JYf74B8DU44jzKkoM"
         (resolved)="onRecaptchaResolved($event)">

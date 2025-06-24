@@ -5,6 +5,7 @@ import { ReactiveFormsModule } from '@angular/forms';
 import { HttpClientModule } from '@angular/common/http';
 import { CommonModule } from '@angular/common';
 import { RecaptchaModule } from 'ng-recaptcha';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-contact-form',
@@ -24,7 +25,8 @@ export class ContactFormComponent implements OnInit {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]],
       message: ['', [Validators.required, Validators.minLength(10)]],
-      recaptcha: ['', Validators.required]
+      recaptcha: ['', Validators.required],
+      condiciones: [false, Validators.requiredTrue]
     });
   }
 
@@ -51,4 +53,5 @@ export class ContactFormComponent implements OnInit {
         });
     }
   }
+
 }
