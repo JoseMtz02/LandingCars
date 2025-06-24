@@ -1,56 +1,90 @@
-import express, { Express, Request, Response } from 'express';
-import mysql, { type Connection } from 'mysql2';
+import { Axios } from './node_modules/axios/index.d';
+import express, { type Express, type Request, type Response } from 'express';
+import sqlite3 from 'sqlite3';
 import cors from 'cors';
+import path from 'path';
+import { fileURLToPath } from 'url';
+import { dirname } from 'path';
+import axios from 'axios';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
 
 interface ContactData {
   fullName: string;
   email: string;
   phone: string;
   message: string;
+  recaptcha: string;
+}
+
+interface RecaptchaResponse {
+  success: boolean;
+  challenge_ts?: string;
+  hostname?: string;
 }
 
 const app: Express = express();
 app.use(cors());
 app.use(express.json());
 
-const db: Connection = mysql.createConnection({
-  host: 'localhost',
-  user: 'root',
-  password: '',
-  database: 'contact_db'
-});
+const dbPath = path.resolve(__dirname, 'contact_db.sqlite');
 
-db.connect((err: Error | null) => {
+const db = new sqlite3.Database(dbPath, (err) => {
   if (err) {
-    console.error('Error conectando a MySQL:', err);
-    return;
+    console.error('Error al conectar con SQLite:', err.message);
+  } else {
+    console.log('Conectado a la base de datos SQLite');
   }
-  console.log('Conectado a MySQL');
 });
 
-db.query(`
+db.run(`
   CREATE TABLE IF NOT EXISTS contacts (
-    id INT AUTO_INCREMENT PRIMARY KEY,
-    fullName VARCHAR(255) NOT NULL,
-    email VARCHAR(255) NOT NULL,
-    phone VARCHAR(20) NOT NULL,
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    fullName TEXT NOT NULL,
+    email TEXT NOT NULL,
+    phone TEXT NOT NULL,
     message TEXT NOT NULL
   )
 `);
 
-app.post('/api/contact', (req: Request, res: Response) => {
-  const { fullName, email, phone, message }: ContactData = req.body;
-  const query: string = 'INSERT INTO contacts (fullName, email, phone, message) VALUES (?, ?, ?, ?)';
-  db.query(query, [fullName, email, phone, message], (err: Error | null, result: any) => {
-    if (err) {
-      console.error('Error al guardar los datos:', err);
-      return res.status(500).json({ error: 'Error al guardar los datos' });
-    }
-    res.status(200).json({ message: 'Datos guardados correctamente' });
-  });
-});
+app.post('/api/contact', async (req: Request, res: Response) => {
+  const secret = '6Ld8Z2srAAAAANazYnRGWg8piHq-zBYcRqKwLImu';
+  const { fullName, email, phone, message, recaptcha }: ContactData = req.body;
 
-const PORT: number = 3000;
+  try {
+    const { data: recaptchaRes }: { data: RecaptchaResponse } = await axios.post(
+      'https://www.google.com/recaptcha/api/siteverify',
+      new URLSearchParams({
+        secret,
+        response: recaptcha
+      }),
+      {
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        }
+      }
+    );
+
+    if (recaptchaRes.success) {
+      const query = `INSERT INTO contacts (fullName, email, phone, message) VALUES (?, ?, ?, ?)`;
+      db.run(query, [fullName, email, phone, message], function (err) {
+        if (err) {
+          console.error('Error al guardar los datos:', err.message);
+          return res.status(500).json({ error: 'Error al guardar los datos' });
+        }
+        return res.status(200).json({ message: 'Datos guardados correctamente', id: this.lastID });
+      });
+    } else {
+      console.error('Error de reCAPTCHA:', recaptchaRes);
+      return res.status(400).json({ error: 'Error de reCAPTCHA', details: recaptchaRes['error-codes'] });
+    }
+  } catch (error) {
+    console.error('Error al verificar reCAPTCHA:', error);
+    return res.status(500).json({ error: 'Error al verificar reCAPTCHA' });
+  }});
+
+const PORT = 3000;
 app.listen(PORT, () => {
   console.log(`Servidor corriendo en http://localhost:${PORT}`);
 });

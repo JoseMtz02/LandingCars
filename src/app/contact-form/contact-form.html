@@ -39,6 +39,13 @@
         <div *ngIf="contactForm.get('message')?.invalid && contactForm.get('message')?.touched"
           class="text-red-500 text-sm mt-2">El mensaje es requerido (mínimo 10 caracteres).</div>
       </div>
+
+      <re-captcha formControlName="recaptcha" siteKey="6Ld8Z2srAAAAAC-LdwLTVr7JYf74B8DU44jzKkoM"
+        (resolved)="onRecaptchaResolved($event)">
+      </re-captcha>
+      <div *ngIf="contactForm.get('recaptcha')?.invalid && contactForm.get('recaptcha')?.touched"
+        class="text-red-500 text-sm mt-2">Por favor resuelve el captcha.</div>
+
       <button type="submit" [disabled]="contactForm.invalid"
         class="w-full bg-blue-600 text-white p-4 rounded-xl hover:bg-blue-700 disabled:bg-gray-400 disabled:cursor-not-allowed transition duration-200 font-semibold text-lg">Contáctame</button>
     </form>
