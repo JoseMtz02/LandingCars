@@ -1,0 +1,238 @@
+import ContactForm from "../components/contact-form.component";
+
+export default function HomeView() {
+  const goTo = (section: string) => {
+    const el = document.getElementById(section);
+    if (el) {
+      el.scrollIntoView({ behavior: "smooth" });
+    }
+  };
+
+  return (
+    <>
+      <header className="bg-gray-900 text-white py-4 sticky top-0 z-50 shadow-lg transition-all duration-300">
+        <div className="container mx-auto px-4 flex justify-between items-center">
+          <h1 className="text-2xl font-semibold tracking-tight">
+            Titan Motors
+          </h1>
+          <nav>
+            <ul className="flex space-x-8">
+              <li>
+                <button
+                  onClick={() => goTo("categories")}
+                  className="text-lg font-medium hover:text-blue-400 transition duration-200"
+                >
+                  Categorías
+                </button>
+              </li>
+              <li>
+                <button
+                  onClick={() => goTo("contact")}
+                  className="text-lg font-medium hover:text-blue-400 transition duration-200"
+                >
+                  Contacto
+                </button>
+              </li>
+            </ul>
+          </nav>
+        </div>
+      </header>
+
+      <section className="mt-10">
+        <div className="container mx-auto px-4 space-y-16">
+          {/* Camionetas Compactas */}
+          <div
+            className="relative rounded-xl overflow-hidden h-[400px] md:h-[500px] lg:h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/camionetas/1.png')" }}
+          >
+            <div className="absolute inset-0 bg-black opacity-80"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center px-4 max-w-2xl">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
+                  Camionetas Compactas
+                </h2>
+                <p className="text-base md:text-lg text-gray-200">
+                  Ágiles y perfectas para moverte con facilidad en la ciudad.
+                </p>
+                <button
+                  onClick={() => goTo("contact")}
+                  className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold"
+                >
+                  Contáctanos
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Camionetas Medianas */}
+          <div
+            className="relative rounded-xl overflow-hidden h-[400px] md:h-[500px] lg:h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/camionetas/2.png')" }}
+          >
+            <div className="absolute inset-0 bg-black opacity-80"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center px-4 max-w-2xl">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
+                  Camionetas Medianas
+                </h2>
+                <p className="text-base md:text-lg text-gray-200">
+                  Espaciosas e ideales para familias y aventuras al aire libre.
+                </p>
+                <button
+                  onClick={() => goTo("contact")}
+                  className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold"
+                >
+                  Contáctanos
+                </button>
+              </div>
+            </div>
+          </div>
+          {/* Camionetas Grandes */}
+          <div
+            className="relative rounded-xl overflow-hidden h-[400px] md:h-[500px] lg:h-[600px] bg-cover bg-center"
+            style={{ backgroundImage: "url('/camionetas/3.png')" }}
+          >
+            <div className="absolute inset-0 bg-black opacity-80"></div>
+            <div className="absolute inset-0 flex items-center justify-center">
+              <div className="text-center px-4 max-w-2xl">
+                <h2 className="text-3xl md:text-4xl font-extrabold text-white mb-4 leading-tight">
+                  Camionetas Grandes
+                </h2>
+                <p className="text-base md:text-lg text-gray-200">
+                  Potentes y robustas para trabajos pesados y máxima capacidad.
+                </p>
+                <button
+                  onClick={() => goTo("contact")}
+                  className="mt-6 inline-block bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition duration-200 font-semibold"
+                >
+                  Contáctanos
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="categories" className="py-20">
+        <div className="container mx-auto px-4">
+          <h2 className="text-4xl font-extrabold text-center mb-12 text-gray-900">
+            Nuestras Categorías
+          </h2>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            {/* Compactas */}
+            <div className="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
+              <img
+                src="/camionetas/cats/1.jpeg"
+                alt="Compacta"
+                className="w-full h-56 object-cover rounded-lg mb-6"
+              />
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                Compactas
+              </h3>
+              <p className="text-gray-600">
+                Ideales para la ciudad, ágiles y económicas. Perfectas para
+                quienes buscan eficiencia.
+              </p>
+              <button
+                onClick={() => goTo("contact")}
+                className="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800"
+              >
+                Más información
+              </button>
+            </div>
+            {/* Medianas */}
+            <div className="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
+              <img
+                src="/camionetas/cats/2.jpeg"
+                alt="Mediana"
+                className="w-full h-56 object-cover rounded-lg mb-6"
+              />
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                Medianas
+              </h3>
+              <p className="text-gray-600">
+                Espaciosas y versátiles, ideales para familias y escapadas al
+                aire libre.
+              </p>
+              <button
+                onClick={() => goTo("contact")}
+                className="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800"
+              >
+                Más información
+              </button>
+            </div>
+            {/* Grandes */}
+            <div className="category-card bg-white p-6 rounded-xl shadow-xl hover:shadow-2xl transform hover:-translate-y-2 transition duration-300">
+              <img
+                src="/camionetas/cats/3.jpg"
+                alt="Grande"
+                className="w-full h-56 object-cover rounded-lg mb-6"
+              />
+              <h3 className="text-2xl font-semibold text-gray-900 mb-2">
+                Grandes
+              </h3>
+              <p className="text-gray-600">
+                Robustas y potentes, diseñadas para trabajos pesados y máxima
+                capacidad.
+              </p>
+              <button
+                onClick={() => goTo("contact")}
+                className="mt-4 inline-block text-blue-600 font-semibold hover:text-blue-800"
+              >
+                Más información
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section id="contact">
+        <ContactForm />
+      </section>
+
+      <footer className="bg-gray-900 text-white py-12">
+        <div className="container mx-auto px-4">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Titan Motors</h3>
+              <p className="text-gray-400">
+                Encuentra la camioneta perfecta para tus necesidades con nuestro
+                servicio personalizado.
+              </p>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Enlaces Rápidos</h3>
+              <ul className="space-y-2">
+                <li>
+                  <button
+                    onClick={() => goTo("categories")}
+                    className="text-gray-400 hover:text-blue-400 transition duration-200"
+                  >
+                    Categorías
+                  </button>
+                </li>
+                <li>
+                  <button
+                    onClick={() => goTo("contact")}
+                    className="text-gray-400 hover:text-blue-400 transition duration-200"
+                  >
+                    Contacto
+                  </button>
+                </li>
+              </ul>
+            </div>
+            <div>
+              <h3 className="text-xl font-semibold mb-4">Contacto</h3>
+              <p className="text-gray-400">camionetas.com</p>
+              <p className="text-gray-400">Teléfono: +34 123 456 789</p>
+            </div>
+          </div>
+          <div className="mt-8 pt-8 border-t border-gray-700 text-center">
+            <p className="text-gray-400">
+              © 2025 Titan Motors. Todos los derechos reservados.
+            </p>
+          </div>
+        </div>
+      </footer>
+    </>
+  );
+}
