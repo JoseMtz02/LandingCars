@@ -89,7 +89,7 @@ export default function ContactFormComponent() {
     });
     if (isValid) {
       try {
-        const response = await apiClient.post("/contact", form);
+        const response = await apiClient.post("contact", form);
         if (response.status !== 200 && response.status !== 201) {
           Swal.fire({
             icon: "error",
