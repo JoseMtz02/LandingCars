@@ -3,9 +3,28 @@ import ReCAPTCHA from "react-google-recaptcha";
 import apiClient from "../../../api/GenericRequest";
 import Swal from "sweetalert2";
 
+// Tipos para el formulario y touched
+interface ContactForm {
+  fullName: string;
+  email: string;
+  phone: string;
+  message: string;
+  condiciones: boolean;
+  recaptcha: string;
+}
+
+interface TouchedFields {
+  fullName?: boolean;
+  email?: boolean;
+  phone?: boolean;
+  message?: boolean;
+  condiciones?: boolean;
+  recaptcha?: boolean;
+}
+
 export default function ContactFormComponent() {
   const recaptchaRef = useRef<ReCAPTCHA>(null);
-  const [form, setForm] = useState({
+  const [form, setForm] = useState<ContactForm>({
     fullName: "",
     email: "",
     phone: "",
@@ -13,7 +32,7 @@ export default function ContactFormComponent() {
     condiciones: false,
     recaptcha: "",
   });
-  const [touched, setTouched] = useState<any>({});
+  const [touched, setTouched] = useState<TouchedFields>({});
 
   const errors = {
     fullName: form.fullName.trim().length < 3,
@@ -29,17 +48,24 @@ export default function ContactFormComponent() {
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    const { name, value, type, checked } = e.target;
-    setForm((prev) => ({
-      ...prev,
-      [name]: type === "checkbox" ? checked : value,
-    }));
+    const { name, value, type } = e.target;
+    if (type === "checkbox") {
+      setForm((prev) => ({
+        ...prev,
+        [name]: (e.target as HTMLInputElement).checked,
+      }));
+    } else {
+      setForm((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
+    }
   };
 
   const handleBlur = (
     e: React.FocusEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
-    setTouched((prev: any) => ({
+    setTouched((prev) => ({
       ...prev,
       [e.target.name]: true,
     }));
@@ -48,7 +74,7 @@ export default function ContactFormComponent() {
   // Recaptcha real
   const handleRecaptcha = (token: string | null) => {
     setForm((prev) => ({ ...prev, recaptcha: token || "" }));
-    setTouched((prev: any) => ({ ...prev, recaptcha: true }));
+    setTouched((prev) => ({ ...prev, recaptcha: true }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -98,6 +124,8 @@ export default function ContactFormComponent() {
           text: "Ocurrió un error inesperado. Inténtalo de nuevo más tarde.",
           confirmButtonColor: "#2563eb",
         });
+
+        console.error(err);
       }
     }
   };
