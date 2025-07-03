@@ -91,7 +91,6 @@ export default function ContactFormComponent() {
           email: form.email,
           phone: form.phone,
           message: form.message,
-          condiciones: form.condiciones || false,
           recaptcha: form.recaptcha,
         });
 

@@ -23,7 +23,6 @@ export interface ContactFormData {
   email: string;
   phone: string;
   message: string;
-  condiciones: boolean;
   recaptcha: string;
 }
 
