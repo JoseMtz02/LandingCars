@@ -1,15 +1,14 @@
 import { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
-import apiClient from "../../../api/GenericRequest";
+import { contactService } from "../../../services/api.service";
 import Swal from "sweetalert2";
 
-// Tipos para el formulario y touched
 interface ContactForm {
   fullName: string;
   email: string;
   phone: string;
   message: string;
-  condiciones: boolean;
+  condiciones?: boolean;
   recaptcha: string;
 }
 
@@ -29,7 +28,6 @@ export default function ContactFormComponent() {
     email: "",
     phone: "",
     message: "",
-    condiciones: false,
     recaptcha: "",
   });
   const [touched, setTouched] = useState<TouchedFields>({});
@@ -71,7 +69,6 @@ export default function ContactFormComponent() {
     }));
   };
 
-  // Recaptcha real
   const handleRecaptcha = (token: string | null) => {
     setForm((prev) => ({ ...prev, recaptcha: token || "" }));
     setTouched((prev) => ({ ...prev, recaptcha: true }));
@@ -89,16 +86,15 @@ export default function ContactFormComponent() {
     });
     if (isValid) {
       try {
-        const response = await apiClient.post("contact", form);
-        if (response.status !== 200 && response.status !== 201) {
-          Swal.fire({
-            icon: "error",
-            title: "Error",
-            text: "Error al enviar el formulario. Inténtalo de nuevo más tarde.",
-            confirmButtonColor: "#2563eb",
-          });
-          return;
-        }
+        await contactService.submitContact({
+          fullName: form.fullName,
+          email: form.email,
+          phone: form.phone,
+          message: form.message,
+          condiciones: form.condiciones || false,
+          recaptcha: form.recaptcha,
+        });
+
         Swal.fire({
           icon: "success",
           title: "¡Enviado!",

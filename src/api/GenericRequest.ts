@@ -312,6 +312,10 @@ class GenericRequest {
     this.authToken = token;
   }
 
+  clearAuthToken(): void {
+    this.authToken = undefined;
+  }
+
   getConfig(): ApiConfig {
     return { ...this.config };
   }
