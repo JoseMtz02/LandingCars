@@ -2,7 +2,7 @@ import { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router";
-import { AuthProvider } from "./contexts/AuthContext";
+import { AuthInitializer } from "./components/AuthInitializer";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomeView from "./pages/home/views/home.view.tsx";
 import AvisoPrivacidad from "./pages/aviso-privacidad/views/aviso-privacidad.view.tsx";
@@ -12,7 +12,7 @@ import DashboardView from "./pages/dashboard/views/dashboard.view.tsx";
 
 createRoot(document.getElementById("root")!).render(
   <StrictMode>
-    <AuthProvider>
+    <AuthInitializer>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomeView />} />
@@ -32,6 +32,6 @@ createRoot(document.getElementById("root")!).render(
           />
         </Routes>
       </BrowserRouter>
-    </AuthProvider>
+    </AuthInitializer>
   </StrictMode>
 );

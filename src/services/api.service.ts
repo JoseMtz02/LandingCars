@@ -67,6 +67,7 @@ class AuthService {
       this.token = null;
       localStorage.removeItem('authToken');
       localStorage.removeItem('user');
+      localStorage.removeItem('auth-storage'); // Limpiar el storage de Zustand
       apiClient.clearAuthToken();
     }
   }
@@ -102,6 +103,13 @@ class AuthService {
 
   getToken(): string | null {
     return this.token;
+  }
+
+  // Nuevo método para verificar si el token es válido
+  hasValidToken(): boolean {
+    const token = localStorage.getItem('authToken');
+    const user = localStorage.getItem('user');
+    return !!(token && user);
   }
 }
 
