@@ -45,20 +45,25 @@ export const useAuthStore = create<AuthState>()(
           
           if (storedToken && storedUser) {
             // Verificar si el token sigue siendo válido
-            const currentUser = await authService.getCurrentUser();
-            if (currentUser) {
-              set({ 
-                user: currentUser, 
-                isAuthenticated: true,
-                token: storedToken,
-                isLoading: false 
-              });
-              return;
+            try {
+              const currentUser = await authService.getCurrentUser();
+              if (currentUser) {
+                set({ 
+                  user: currentUser, 
+                  isAuthenticated: true,
+                  token: storedToken,
+                  isLoading: false 
+                });
+                return;
+              }
+            } catch (tokenError) {
+              console.log('Token expired or invalid, cleaning up...', tokenError);
+              // Token expirado o inválido, limpiar
+              await authService.logout();
             }
           }
           
           // Si no hay sesión válida, limpiar todo
-          await authService.logout();
           set({ 
             user: null, 
             isAuthenticated: false,
@@ -67,6 +72,7 @@ export const useAuthStore = create<AuthState>()(
           });
         } catch (error) {
           console.error('Error initializing auth:', error);
+          // En caso de error, limpiar todo
           await authService.logout();
           set({ 
             user: null, 
@@ -136,6 +142,16 @@ export const useAuthStore = create<AuthState>()(
         token: state.token,
         isAuthenticated: state.isAuthenticated 
       }),
+      onRehydrateStorage: () => (state) => {
+        if (state) {
+          // Después de rehydratar, verificar si tenemos datos válidos
+          const hasValidData = state.user && state.token && state.isAuthenticated;
+          if (hasValidData) {
+            // El token se configurará en initializeAuth
+            console.log('Auth data rehydrated successfully');
+          }
+        }
+      },
     }
   )
 );

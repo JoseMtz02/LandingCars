@@ -3,6 +3,7 @@ import { createRoot } from "react-dom/client";
 import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { AuthInitializer } from "./components/AuthInitializer";
+import { AuthRedirect } from "./components/AuthRedirect";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomeView from "./pages/home/views/home.view.tsx";
 import AvisoPrivacidad from "./pages/aviso-privacidad/views/aviso-privacidad.view.tsx";
@@ -21,7 +22,14 @@ createRoot(document.getElementById("root")!).render(
             path="/terminos-condiciones"
             element={<TerminosCondicionesView />}
           />
-          <Route path="/login" element={<LoginView />} />
+          <Route
+            path="/login"
+            element={
+              <AuthRedirect>
+                <LoginView />
+              </AuthRedirect>
+            }
+          />
           <Route
             path="/dashboard"
             element={

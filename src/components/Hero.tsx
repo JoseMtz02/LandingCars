@@ -1,7 +1,11 @@
 import { motion } from "framer-motion";
 import { Car, Shield, Star, Users } from "lucide-react";
+import { Link } from "react-router";
+import { useAuth } from "../hooks/useAuth";
 
 const Hero = () => {
+  const { isAuthenticated } = useAuth();
+
   return (
     <section className="relative min-h-screen flex items-center justify-center overflow-hidden bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
       {/* Background Pattern */}
@@ -50,17 +54,27 @@ const Hero = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.6 }}
           >
-            <button
-              onClick={() =>
-                document
-                  .getElementById("categories")
-                  ?.scrollIntoView({ behavior: "smooth" })
-              }
-              className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:from-blue-700 hover:to-blue-800 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25"
-            >
-              <span className="relative z-10">Explorar Catálogo</span>
-              <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300" />
-            </button>
+            {isAuthenticated ? (
+              <Link
+                to="/dashboard"
+                className="group relative px-8 py-4 bg-gradient-to-r from-green-600 to-green-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:from-green-700 hover:to-green-800 hover:scale-105 hover:shadow-2xl hover:shadow-green-500/25"
+              >
+                <span className="relative z-10">Ir a Dashboard</span>
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300" />
+              </Link>
+            ) : (
+              <button
+                onClick={() =>
+                  document
+                    .getElementById("categories")
+                    ?.scrollIntoView({ behavior: "smooth" })
+                }
+                className="group relative px-8 py-4 bg-gradient-to-r from-blue-600 to-blue-700 text-white rounded-xl font-semibold text-lg transition-all duration-300 hover:from-blue-700 hover:to-blue-800 hover:scale-105 hover:shadow-2xl hover:shadow-blue-500/25"
+              >
+                <span className="relative z-10">Explorar Catálogo</span>
+                <div className="absolute inset-0 bg-white opacity-0 group-hover:opacity-10 rounded-xl transition-opacity duration-300" />
+              </button>
+            )}
 
             <button
               onClick={() =>

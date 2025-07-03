@@ -1,4 +1,4 @@
-import apiClient from '../api/GenericRequest';
+import apiClient from '../api/ApiClient';
 
 export interface LoginCredentials {
   username: string;
