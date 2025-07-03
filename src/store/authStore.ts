@@ -8,13 +8,18 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   token: string | null;
+  lastAuthCheck: number | null;
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
   setUser: (user: User | null) => void;
   setLoading: (loading: boolean) => void;
   initializeAuth: () => Promise<void>;
+  clearAuthState: () => void;
 }
+
+// Tiempo de vida del cache de autenticación (5 minutos)
+const AUTH_CACHE_TTL = 5 * 60 * 1000;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -23,12 +28,15 @@ export const useAuthStore = create<AuthState>()(
       isAuthenticated: false,
       isLoading: true,
       token: null,
+      lastAuthCheck: null,
 
       setUser: (user: User | null) => {
+        const token = user ? get().token : null;
         set({ 
           user, 
           isAuthenticated: !!user,
-          token: user ? authService.getToken() : null
+          token,
+          lastAuthCheck: user ? Date.now() : null
         });
       },
 
@@ -36,50 +44,64 @@ export const useAuthStore = create<AuthState>()(
         set({ isLoading: loading });
       },
 
+      clearAuthState: () => {
+        set({
+          user: null,
+          isAuthenticated: false,
+          token: null,
+          lastAuthCheck: null,
+          isLoading: false
+        });
+      },
+
       initializeAuth: async () => {
         set({ isLoading: true });
         try {
-          // Verificar si hay token guardado
-          const storedToken = authService.getToken();
-          const storedUser = authService.getStoredUser();
+          const state = get();
           
-          if (storedToken && storedUser) {
-            // Verificar si el token sigue siendo válido
+          // Si tenemos datos en el store de Zustand, usarlos como fuente de verdad
+          if (state.token && state.user) {
+            // Verificar si el cache sigue siendo válido
+            const cacheValid = state.lastAuthCheck && 
+              (Date.now() - state.lastAuthCheck) < AUTH_CACHE_TTL;
+            
+            if (cacheValid) {
+              // Cache válido, usar datos existentes
+              authService.setInternalToken(state.token);
+              set({ isLoading: false });
+              return;
+            }
+            
+            // Cache expirado, verificar con el servidor
             try {
+              authService.setInternalToken(state.token);
               const currentUser = await authService.getCurrentUser();
               if (currentUser) {
                 set({ 
                   user: currentUser, 
                   isAuthenticated: true,
-                  token: storedToken,
+                  token: state.token,
+                  lastAuthCheck: Date.now(),
                   isLoading: false 
                 });
                 return;
               }
             } catch (tokenError) {
               console.log('Token expired or invalid, cleaning up...', tokenError);
-              // Token expirado o inválido, limpiar
-              await authService.logout();
+              // Token expirado, limpiar
+              await get().logout();
+              return;
             }
           }
           
-          // Si no hay sesión válida, limpiar todo
-          set({ 
-            user: null, 
-            isAuthenticated: false,
-            token: null,
-            isLoading: false 
-          });
+          // No hay datos válidos, limpiar estado
+          get().clearAuthState();
+          authService.clearInternalToken();
+          
         } catch (error) {
           console.error('Error initializing auth:', error);
-          // En caso de error, limpiar todo
-          await authService.logout();
-          set({ 
-            user: null, 
-            isAuthenticated: false,
-            token: null,
-            isLoading: false 
-          });
+          get().clearAuthState();
+          authService.clearInternalToken();
         }
       },
 
@@ -88,12 +110,17 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           const response = await authService.login(credentials);
           
+          // Zustand manejará la persistencia automáticamente
           set({ 
             user: response.user, 
             isAuthenticated: true,
-            token: authService.getToken(),
+            token: response.token,
+            lastAuthCheck: Date.now(),
             isLoading: false 
           });
+          
+          // Configurar el token en el servicio
+          authService.setInternalToken(response.token);
         } catch (error) {
           set({ isLoading: false });
           console.error('Login failed:', error);
@@ -103,27 +130,34 @@ export const useAuthStore = create<AuthState>()(
 
       logout: async () => {
         try {
-          await authService.logout();
+          const state = get();
+          if (state.token) {
+            await authService.logout();
+          }
         } catch (error) {
           console.error('Logout failed:', error);
         } finally {
-          set({ 
-            user: null, 
-            isAuthenticated: false,
-            token: null,
-            isLoading: false 
-          });
+          // Limpiar estado
+          get().clearAuthState();
+          authService.clearInternalToken();
         }
       },
 
       refreshUser: async () => {
         try {
+          const state = get();
+          if (!state.token) {
+            await get().logout();
+            return;
+          }
+          
           const currentUser = await authService.getCurrentUser();
           if (currentUser) {
             set({ 
               user: currentUser, 
               isAuthenticated: true,
-              token: authService.getToken()
+              token: state.token,
+              lastAuthCheck: Date.now()
             });
           } else {
             await get().logout();
@@ -135,23 +169,31 @@ export const useAuthStore = create<AuthState>()(
       },
     }),
     {
-      name: 'auth-storage',
+      name: 'titan-auth-storage',
       storage: createJSONStorage(() => localStorage),
       partialize: (state) => ({ 
         user: state.user,
         token: state.token,
-        isAuthenticated: state.isAuthenticated 
+        isAuthenticated: state.isAuthenticated,
+        lastAuthCheck: state.lastAuthCheck
       }),
-      onRehydrateStorage: () => (state) => {
+      onRehydrateStorage: () => (state, error) => {
+        if (error) {
+          console.error('Error rehydrating auth state:', error);
+          return;
+        }
+        
         if (state) {
-          // Después de rehydratar, verificar si tenemos datos válidos
-          const hasValidData = state.user && state.token && state.isAuthenticated;
-          if (hasValidData) {
-            // El token se configurará en initializeAuth
-            console.log('Auth data rehydrated successfully');
+          console.log('Auth state rehydrated successfully');
+          // Configurar el token en el servicio si existe
+          if (state.token) {
+            authService.setInternalToken(state.token);
           }
         }
       },
+      // Configuraciones adicionales para mejorar la persistencia
+      skipHydration: false,
+      version: 1, // Versión del schema para futuras migraciones
     }
   )
 );

@@ -31,11 +31,24 @@ class AuthService {
   private token: string | null = null;
 
   constructor() {
-    // Cargar token del localStorage al inicializar
-    this.token = localStorage.getItem('authToken');
-    if (this.token) {
-      apiClient.setAuthToken(this.token);
+    // No cargar automáticamente desde localStorage aquí
+    // Zustand manejará la persistencia
+  }
+
+  // Método para configurar el token internamente (usado por Zustand)
+  setInternalToken(token: string | null) {
+    this.token = token;
+    if (token) {
+      apiClient.setAuthToken(token);
+    } else {
+      apiClient.clearAuthToken();
     }
+  }
+
+  // Método para limpiar el token internamente (usado por Zustand)
+  clearInternalToken() {
+    this.token = null;
+    apiClient.clearAuthToken();
   }
 
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
@@ -44,8 +57,6 @@ class AuthService {
       
       if (response.data && response.data.token) {
         this.token = response.data.token;
-        localStorage.setItem('authToken', this.token);
-        localStorage.setItem('user', JSON.stringify(response.data.user));
         apiClient.setAuthToken(this.token);
       }
       
@@ -65,9 +76,6 @@ class AuthService {
       console.error('Logout error:', error);
     } finally {
       this.token = null;
-      localStorage.removeItem('authToken');
-      localStorage.removeItem('user');
-      localStorage.removeItem('auth-storage'); // Limpiar el storage de Zustand
       apiClient.clearAuthToken();
     }
   }
@@ -82,41 +90,34 @@ class AuthService {
       return response.data;
     } catch (error) {
       console.error('Get current user error:', error);
-      // Si hay error, limpiar la sesión
-      this.logout();
-      return null;
+      throw error; // No limpiar la sesión aquí, dejar que Zustand lo maneje
     }
   }
 
+  // Método legacy - mantener para compatibilidad
   getStoredUser(): User | null {
-    try {
-      const storedUser = localStorage.getItem('user');
-      return storedUser ? JSON.parse(storedUser) : null;
-    } catch {
-      return null;
-    }
+    // Ya no usamos localStorage directamente, Zustand maneja esto
+    return null;
   }
 
   isAuthenticated(): boolean {
-    return !!this.token && !!this.getStoredUser();
+    return !!this.token;
   }
 
   getToken(): string | null {
     return this.token;
   }
 
-  // Nuevo método para verificar si el token es válido
+  // Método legacy - mantener para compatibilidad
   hasValidToken(): boolean {
-    const token = localStorage.getItem('authToken');
-    const user = localStorage.getItem('user');
-    return !!(token && user);
+    return !!this.token;
   }
 }
 
 class ContactService {
   async submitContact(formData: ContactFormData): Promise<{ message: string }> {
     try {
-      const response = await apiClient.post<{ message: string }>('contact', formData);
+      const response = await apiClient.post<{ message: string }>('contacts', formData);
       return response.data;
     } catch (error) {
       console.error('Contact form error:', error);

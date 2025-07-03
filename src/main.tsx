@@ -4,6 +4,7 @@ import "./index.css";
 import { BrowserRouter, Route, Routes } from "react-router";
 import { AuthInitializer } from "./components/AuthInitializer";
 import { AuthRedirect } from "./components/AuthRedirect";
+import { AuthPersistenceDebugger } from "./components/AuthPersistenceDebugger";
 import ProtectedRoute from "./components/ProtectedRoute";
 import HomeView from "./pages/home/views/home.view.tsx";
 import AvisoPrivacidad from "./pages/aviso-privacidad/views/aviso-privacidad.view.tsx";
@@ -39,6 +40,7 @@ createRoot(document.getElementById("root")!).render(
             }
           />
         </Routes>
+        <AuthPersistenceDebugger />
       </BrowserRouter>
     </AuthInitializer>
   </StrictMode>
