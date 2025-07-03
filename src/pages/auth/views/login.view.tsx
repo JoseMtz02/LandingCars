@@ -6,7 +6,10 @@ import { useAuth } from "../../../hooks/useAuth";
 import Swal from "sweetalert2";
 
 const LoginView = () => {
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({
+    username: "",
+    password: "",
+  });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { login } = useAuth();
@@ -114,7 +117,7 @@ const LoginView = () => {
                   id="email"
                   type="email"
                   required
-                  value={credentials.email}
+                  value={credentials.username}
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
