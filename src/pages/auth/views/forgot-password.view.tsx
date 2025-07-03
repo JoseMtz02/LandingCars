@@ -6,7 +6,7 @@ import Swal from "sweetalert2";
 import { authService } from "../../../services/api.service";
 
 const ForgotPasswordView = () => {
-  const [email, setEmail] = useState("");
+  const [identifier, setIdentifier] = useState("");
   const [isLoading, setIsLoading] = useState(false);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -14,26 +14,32 @@ const ForgotPasswordView = () => {
     setIsLoading(true);
 
     try {
-      const response = await authService.forgotPassword(email);
+      const response = await authService.forgotPassword(identifier);
 
-      Swal.fire({
-        icon: "success",
-        title: "¡Correo enviado!",
-        text:
-          response.message ||
-          "Te hemos enviado un enlace para restablecer tu contraseña",
-        confirmButtonColor: "#2563eb",
-        timer: 3000,
-        showConfirmButton: false,
-      });
-
-      setEmail("");
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "¡Solicitud enviada!",
+          text: response.message,
+          confirmButtonColor: "#2563eb",
+          timer: 3000,
+          showConfirmButton: false,
+        });
+        setIdentifier("");
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text: response.message || "No se pudo procesar tu solicitud.",
+          confirmButtonColor: "#2563eb",
+        });
+      }
     } catch (error) {
       console.error("Error al enviar correo de recuperación:", error);
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "Hubo un problema al enviar el correo. Verifica que el email sea correcto.",
+        text: "Hubo un problema al procesar tu solicitud. Inténtalo de nuevo.",
         confirmButtonColor: "#2563eb",
       });
     } finally {
@@ -102,31 +108,31 @@ const ForgotPasswordView = () => {
             {/* Instructions */}
             <div className="text-center mb-6">
               <p className="text-gray-300 text-sm">
-                Ingresa tu correo electrónico y te enviaremos un enlace para
-                restablecer tu contraseña.
+                Ingresa tu correo electrónico o nombre de usuario y te
+                enviaremos un enlace para restablecer tu contraseña.
               </p>
             </div>
 
-            {/* Email Field */}
+            {/* Identifier Field */}
             <div>
               <label
-                htmlFor="email"
+                htmlFor="identifier"
                 className="block text-sm font-medium text-gray-200 mb-2"
               >
-                Correo Electrónico
+                Correo Electrónico o Usuario
               </label>
               <div className="relative">
                 <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                   <Mail className="h-5 w-5 text-gray-400" />
                 </div>
                 <input
-                  id="email"
-                  type="email"
+                  id="identifier"
+                  type="text"
                   required
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
                   className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-xl bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
-                  placeholder="admin@titanmotors.mx"
+                  placeholder="admin@titanmotors.mx o usuario"
                 />
               </div>
             </div>

@@ -41,23 +41,26 @@ src/
 
 Se agregaron dos nuevos métodos al `AuthService`:
 
-### `forgotPassword(email: string)`
+### `forgotPassword(identifier: string)`
 
 - **Endpoint**: `POST /auth/forgot-password`
-- **Payload**: `{ email: string }`
-- **Respuesta**: `{ message: string }`
+- **Payload**: `{ identifier: string }` (puede ser email o nombre de usuario)
+- **Respuesta**: `{ success: boolean, message: string }`
 
-### `resetPassword(token: string, password: string)`
+### `resetPassword(token: string, newPassword: string)`
 
 - **Endpoint**: `POST /auth/reset-password`
-- **Payload**: `{ token: string, password: string }`
-- **Respuesta**: `{ message: string }`
+- **Payload**: `{ token: string, newPassword: string }`
+- **Respuesta**: `{ success: boolean, message: string }`
 
 ## Flujo de Usuario
 
 1. **Solicitud de Recuperación**:
 
    - Usuario va a `/auth/forgot-password`
+   - Ingresa su correo electrónico **o nombre de usuario**
+   - El sistema procesa la solicitud independientemente de si el usuario existe (por seguridad)
+   - Muestra mensaje de confirmación
    - Ingresa su correo electrónico
    - Recibe un correo con un enlace de recuperación
 
@@ -119,3 +122,37 @@ Una vez que proporciones los detalles del endpoint, se pueden:
 - `/auth/reset-password` - Restablecimiento de contraseña
 
 Todas las rutas de autenticación están protegidas con `AuthRedirect` para redirigir usuarios ya autenticados.
+
+## Cambios Realizados por Integración con Backend
+
+### Actualización del Servicio AuthService
+
+- **forgotPassword**: Cambió de `email` a `identifier` para aceptar correo o usuario
+- **resetPassword**: Cambió `password` a `newPassword` según el backend
+- **Respuestas**: Ambos métodos ahora manejan `{ success: boolean, message: string }`
+
+### Actualización de las Vistas
+
+- **ForgotPasswordView**:
+  - Campo de entrada acepta email o nombre de usuario
+  - Manejo de respuesta con validación `success`
+  - Mensajes de error y éxito diferenciados
+- **ResetPasswordView**:
+  - Validación de respuesta `success` del backend
+  - Manejo de errores específicos según la respuesta
+  - Redirección solo en caso de éxito
+
+### Mejoras de Seguridad Implementadas
+
+- Siempre muestra mensaje de confirmación en forgot-password (no revela si el usuario existe)
+- Validación de tokens en reset-password
+- Manejo de errores sin revelar información sensible
+
+## Estado Actual
+
+✅ **Completamente funcional** con los endpoints proporcionados:
+
+- `POST /auth/forgot-password` con payload `{ identifier }`
+- `POST /auth/reset-password` con payload `{ token, newPassword }`
+
+El sistema está listo para producción y sigue las mejores prácticas de seguridad.

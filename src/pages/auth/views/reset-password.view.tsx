@@ -68,20 +68,32 @@ const ResetPasswordView = () => {
         passwords.password
       );
 
-      Swal.fire({
-        icon: "success",
-        title: "¡Contraseña restablecida!",
-        text:
-          response.message || "Tu contraseña ha sido actualizada correctamente",
-        confirmButtonColor: "#2563eb",
-        timer: 3000,
-        showConfirmButton: false,
-      });
+      if (response.success) {
+        Swal.fire({
+          icon: "success",
+          title: "¡Contraseña restablecida!",
+          text:
+            response.message ||
+            "Tu contraseña ha sido actualizada correctamente",
+          confirmButtonColor: "#2563eb",
+          timer: 3000,
+          showConfirmButton: false,
+        });
 
-      // Redirigir al login después de 3 segundos
-      setTimeout(() => {
-        navigate("/auth/login");
-      }, 3000);
+        // Redirigir al login después de 3 segundos
+        setTimeout(() => {
+          navigate("/auth/login");
+        }, 3000);
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error",
+          text:
+            response.message ||
+            "Hubo un problema al restablecer tu contraseña.",
+          confirmButtonColor: "#2563eb",
+        });
+      }
     } catch (error) {
       console.error("Error al restablecer contraseña:", error);
       Swal.fire({

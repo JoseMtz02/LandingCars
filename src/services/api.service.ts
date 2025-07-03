@@ -93,9 +93,9 @@ class AuthService {
     }
   }
 
-  async forgotPassword(email: string): Promise<{ message: string }> {
+  async forgotPassword(identifier: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ message: string }>('auth/forgot-password', { email });
+      const response = await apiClient.post<{ success: boolean; message: string }>('auth/forgot-password', { identifier });
       return response.data;
     } catch (error) {
       console.error('Forgot password error:', error);
@@ -103,11 +103,11 @@ class AuthService {
     }
   }
 
-  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+  async resetPassword(token: string, newPassword: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ message: string }>('auth/reset-password', { 
+      const response = await apiClient.post<{ success: boolean; message: string }>('auth/reset-password', { 
         token, 
-        password 
+        newPassword 
       });
       return response.data;
     } catch (error) {
