@@ -121,7 +121,7 @@ const LoginView = () => {
                   onChange={(e) =>
                     setCredentials((prev) => ({
                       ...prev,
-                      email: e.target.value,
+                      username: e.target.value,
                     }))
                   }
                   className="block w-full pl-10 pr-3 py-3 border border-white/20 rounded-xl bg-white/10 text-white placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent backdrop-blur-sm"
