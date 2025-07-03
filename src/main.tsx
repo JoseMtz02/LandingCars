@@ -10,6 +10,8 @@ import HomeView from "./pages/home/views/home.view.tsx";
 import AvisoPrivacidad from "./pages/aviso-privacidad/views/aviso-privacidad.view.tsx";
 import TerminosCondicionesView from "./pages/terminos-condiciones/views/terminos-condiciones.view.tsx";
 import LoginView from "./pages/auth/views/login.view.tsx";
+import ForgotPasswordView from "./pages/auth/views/forgot-password.view.tsx";
+import ResetPasswordView from "./pages/auth/views/reset-password.view.tsx";
 import DashboardView from "./pages/dashboard/views/dashboard.view.tsx";
 
 createRoot(document.getElementById("root")!).render(
@@ -28,6 +30,30 @@ createRoot(document.getElementById("root")!).render(
             element={
               <AuthRedirect>
                 <LoginView />
+              </AuthRedirect>
+            }
+          />
+          <Route
+            path="/auth/login"
+            element={
+              <AuthRedirect>
+                <LoginView />
+              </AuthRedirect>
+            }
+          />
+          <Route
+            path="/auth/forgot-password"
+            element={
+              <AuthRedirect>
+                <ForgotPasswordView />
+              </AuthRedirect>
+            }
+          />
+          <Route
+            path="/auth/reset-password"
+            element={
+              <AuthRedirect>
+                <ResetPasswordView />
               </AuthRedirect>
             }
           />

@@ -93,6 +93,29 @@ class AuthService {
     }
   }
 
+  async forgotPassword(email: string): Promise<{ message: string }> {
+    try {
+      const response = await apiClient.post<{ message: string }>('auth/forgot-password', { email });
+      return response.data;
+    } catch (error) {
+      console.error('Forgot password error:', error);
+      throw error;
+    }
+  }
+
+  async resetPassword(token: string, password: string): Promise<{ message: string }> {
+    try {
+      const response = await apiClient.post<{ message: string }>('auth/reset-password', { 
+        token, 
+        password 
+      });
+      return response.data;
+    } catch (error) {
+      console.error('Reset password error:', error);
+      throw error;
+    }
+  }
+
   // Método legacy - mantener para compatibilidad
   getStoredUser(): User | null {
     // Ya no usamos localStorage directamente, Zustand maneja esto
