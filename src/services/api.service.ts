@@ -1,5 +1,16 @@
 import apiClient from '../api/ApiClient';
-import type { User } from '../types/auth';
+import type { 
+  Contact, 
+  ContactResponse, 
+  ContactSingleResponse, 
+  ContactQueryParams, 
+  DashboardStats,
+  ContactUpdateData,
+  User,
+  Message,
+  UserCreateData,
+  UserUpdateData
+} from '../types/contacts';
 
 export interface LoginCredentials {
   username: string;
@@ -205,9 +216,9 @@ class AuthService {
 }
 
 class ContactService {
-  async submitContact(formData: ContactFormData): Promise<{ message: string }> {
+  async submitContact(formData: ContactFormData): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ message: string }>('contacts', formData);
+      const response = await apiClient.post<{ success: boolean; message: string }>('contact', formData);
       return response.data;
     } catch (error) {
       console.error('Contact form error:', error);
@@ -215,9 +226,20 @@ class ContactService {
     }
   }
 
-  async getContacts(): Promise<any[]> {
+  async getContacts(params?: ContactQueryParams): Promise<ContactResponse> {
     try {
-      const response = await apiClient.get<any[]>('contacts');
+      const queryParams = new URLSearchParams();
+      
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      
+      const url = queryParams.toString() ? `contacts?${queryParams.toString()}` : 'contacts';
+      const response = await apiClient.get<ContactResponse>(url);
       return response.data;
     } catch (error) {
       console.error('Get contacts error:', error);
@@ -225,9 +247,20 @@ class ContactService {
     }
   }
 
-  async getMyContacts(): Promise<any[]> {
+  async getMyContacts(params?: ContactQueryParams): Promise<ContactResponse> {
     try {
-      const response = await apiClient.get<any[]>('contacts/my');
+      const queryParams = new URLSearchParams();
+      
+      if (params) {
+        Object.entries(params).forEach(([key, value]) => {
+          if (value !== undefined && value !== null) {
+            queryParams.append(key, value.toString());
+          }
+        });
+      }
+      
+      const url = queryParams.toString() ? `contacts/my?${queryParams.toString()}` : 'contacts/my';
+      const response = await apiClient.get<ContactResponse>(url);
       return response.data;
     } catch (error) {
       console.error('Get my contacts error:', error);
@@ -235,61 +268,86 @@ class ContactService {
     }
   }
 
-  async getContactById(id: string): Promise<any> {
+  async getContactById(id: number): Promise<Contact> {
     try {
-      const response = await apiClient.get<any>(`contacts/${id}`);
-      return response.data;
+      const response = await apiClient.get<ContactSingleResponse>(`contacts/${id}`);
+      return response.data.data;
     } catch (error) {
       console.error('Get contact by ID error:', error);
       throw error;
     }
   }
 
-  async updateContact(id: string, data: any): Promise<any> {
+  async updateContact(id: number, data: ContactUpdateData): Promise<Contact> {
     try {
-      const response = await apiClient.put<any>(`contacts/${id}`, data);
-      return response.data;
+      const response = await apiClient.put<ContactSingleResponse>(`contacts/${id}`, data);
+      return response.data.data;
     } catch (error) {
       console.error('Update contact error:', error);
       throw error;
     }
   }
 
-  async deleteContact(id: string): Promise<void> {
+  async deleteContact(id: number): Promise<{ success: boolean; message: string }> {
     try {
-      await apiClient.delete(`contacts/${id}`);
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`contacts/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete contact error:', error);
       throw error;
     }
   }
 
-  async assignContact(id: string, userId: string): Promise<any> {
+  async assignContact(contactId: number, userId: number): Promise<Contact> {
     try {
-      const response = await apiClient.put<any>(`contacts/${id}/assign`, { userId });
-      return response.data;
+      const response = await apiClient.put<ContactSingleResponse>(`contacts/${contactId}/assign`, { 
+        assigned_to: userId 
+      });
+      return response.data.data;
     } catch (error) {
       console.error('Assign contact error:', error);
       throw error;
     }
   }
 
-  async sendFollowUp(id: string, message: string): Promise<any> {
+  async sendFollowUpEmail(contactId: number, customMessage?: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<any>(`contacts/${id}/follow-up`, { message });
+      const response = await apiClient.post<{ success: boolean; message: string }>(`contacts/${contactId}/follow-up`, { 
+        customMessage 
+      });
       return response.data;
     } catch (error) {
-      console.error('Send follow up error:', error);
+      console.error('Send follow up email error:', error);
+      throw error;
+    }
+  }
+
+  async getDashboardStats(): Promise<DashboardStats> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: DashboardStats }>('contacts/stats');
+      return response.data.data;
+    } catch (error) {
+      console.error('Get dashboard stats error:', error);
+      throw error;
+    }
+  }
+
+  async getUsers(): Promise<User[]> {
+    try {
+      const response = await apiClient.get<{ success: boolean; data: User[] }>('auth/users');
+      return response.data.data;
+    } catch (error) {
+      console.error('Get users error:', error);
       throw error;
     }
   }
 }
 
 class DashboardService {
-  async getStats(): Promise<any> {
+  async getStats(): Promise<DashboardStats> {
     try {
-      const response = await apiClient.get<any>('contacts/stats');
-      return response.data;
+      const response = await apiClient.get<{ success: boolean; data: DashboardStats }>('contacts/stats');
+      return response.data.data;
     } catch (error) {
       console.error('Get dashboard stats error:', error);
       throw error;
@@ -308,48 +366,50 @@ class MessagesService {
     }
   }
 
-  async getContactMessages(contactId: string): Promise<any[]> {
+  async getContactMessages(contactId: string): Promise<Message[]> {
     try {
-      const response = await apiClient.get<any[]>(`messages/contact/${contactId}`);
-      return response.data;
+      const response = await apiClient.get<{ success: boolean; data: Message[] }>(`messages/contact/${contactId}`);
+      return response.data.data;
     } catch (error) {
       console.error('Get contact messages error:', error);
       throw error;
     }
   }
 
-  async createMessage(contactId: string, message: string): Promise<any> {
+  async createMessage(contactId: string, message: string): Promise<Message> {
     try {
-      const response = await apiClient.post<any>(`messages/contact/${contactId}`, { message });
-      return response.data;
+      const response = await apiClient.post<{ success: boolean; data: Message }>(`messages/contact/${contactId}`, { message });
+      return response.data.data;
     } catch (error) {
       console.error('Create message error:', error);
       throw error;
     }
   }
 
-  async markAsRead(contactId: string): Promise<void> {
+  async markAsRead(contactId: string): Promise<{ success: boolean; message: string }> {
     try {
-      await apiClient.post(`messages/contact/${contactId}/mark-read`);
+      const response = await apiClient.post<{ success: boolean; message: string }>(`messages/contact/${contactId}/mark-read`);
+      return response.data;
     } catch (error) {
       console.error('Mark as read error:', error);
       throw error;
     }
   }
 
-  async updateMessage(id: string, message: string): Promise<any> {
+  async updateMessage(id: string, message: string): Promise<Message> {
     try {
-      const response = await apiClient.put<any>(`messages/${id}`, { message });
-      return response.data;
+      const response = await apiClient.put<{ success: boolean; data: Message }>(`messages/${id}`, { message });
+      return response.data.data;
     } catch (error) {
       console.error('Update message error:', error);
       throw error;
     }
   }
 
-  async deleteMessage(id: string): Promise<void> {
+  async deleteMessage(id: string): Promise<{ success: boolean; message: string }> {
     try {
-      await apiClient.delete(`messages/${id}`);
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`messages/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete message error:', error);
       throw error;
@@ -358,49 +418,50 @@ class MessagesService {
 }
 
 class UsersService {
-  async createUser(userData: any): Promise<any> {
+  async createUser(userData: UserCreateData): Promise<User> {
     try {
-      const response = await apiClient.post<any>('auth/users', userData);
-      return response.data;
+      const response = await apiClient.post<{ success: boolean; data: User }>('auth/users', userData);
+      return response.data.data;
     } catch (error) {
       console.error('Create user error:', error);
       throw error;
     }
   }
 
-  async getUsers(): Promise<any[]> {
+  async getUsers(): Promise<User[]> {
     try {
-      const response = await apiClient.get<any[]>('auth/users');
-      return response.data;
+      const response = await apiClient.get<{ success: boolean; data: User[] }>('auth/users');
+      return response.data.data;
     } catch (error) {
       console.error('Get users error:', error);
       throw error;
     }
   }
 
-  async getUserById(id: string): Promise<any> {
+  async getUserById(id: string): Promise<User> {
     try {
-      const response = await apiClient.get<any>(`auth/users/${id}`);
-      return response.data;
+      const response = await apiClient.get<{ success: boolean; data: User }>(`auth/users/${id}`);
+      return response.data.data;
     } catch (error) {
       console.error('Get user by ID error:', error);
       throw error;
     }
   }
 
-  async updateUser(id: string, userData: any): Promise<any> {
+  async updateUser(id: string, userData: UserUpdateData): Promise<User> {
     try {
-      const response = await apiClient.put<any>(`auth/users/${id}`, userData);
-      return response.data;
+      const response = await apiClient.put<{ success: boolean; data: User }>(`auth/users/${id}`, userData);
+      return response.data.data;
     } catch (error) {
       console.error('Update user error:', error);
       throw error;
     }
   }
 
-  async deleteUser(id: string): Promise<void> {
+  async deleteUser(id: string): Promise<{ success: boolean; message: string }> {
     try {
-      await apiClient.delete(`auth/users/${id}`);
+      const response = await apiClient.delete<{ success: boolean; message: string }>(`auth/users/${id}`);
+      return response.data;
     } catch (error) {
       console.error('Delete user error:', error);
       throw error;

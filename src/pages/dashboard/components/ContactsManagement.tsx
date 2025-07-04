@@ -1,29 +1,8 @@
-import { useState, useEffect } from "react";
-import { contactService, usersService } from "../../../services/api.service";
+import { useState, useEffect, useCallback } from "react";
+import { contactService } from "../../../services/api.service";
 import { useAuth } from "../../../hooks/useAuth";
+import type { Contact, User } from "../../../types/contacts";
 import Swal from "sweetalert2";
-
-interface Contact {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-  message: string;
-  assignedUserId?: string;
-  assignedUser?: {
-    id: string;
-    name: string;
-  };
-  status: "pending" | "in_progress" | "completed";
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface User {
-  id: string;
-  name: string;
-  email: string;
-}
 
 export default function ContactsManagement() {
   const { user: currentUser } = useAuth();
@@ -35,18 +14,16 @@ export default function ContactsManagement() {
   const [followUpMessage, setFollowUpMessage] = useState("");
   const [showFollowUpModal, setShowFollowUpModal] = useState(false);
 
-  useEffect(() => {
-    loadContacts();
-    loadUsers();
-  }, []);
-
-  const loadContacts = async () => {
+  const loadContacts = useCallback(async () => {
     try {
       setLoading(true);
-      const contactsData =
+      const response =
         currentUser?.role === "admin"
           ? await contactService.getContacts()
           : await contactService.getMyContacts();
+
+      // Extraer los contactos de la respuesta
+      const contactsData = response.data || [];
       setContacts(contactsData);
     } catch (error) {
       console.error("Error loading contacts:", error);
@@ -58,20 +35,25 @@ export default function ContactsManagement() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentUser?.role]);
 
-  const loadUsers = async () => {
+  const loadUsers = useCallback(async () => {
     if (currentUser?.role === "admin") {
       try {
-        const usersData = await usersService.getUsers();
+        const usersData = await contactService.getUsers();
         setUsers(usersData);
       } catch (error) {
         console.error("Error loading users:", error);
       }
     }
-  };
+  }, [currentUser?.role]);
 
-  const handleAssignContact = async (userId: string) => {
+  useEffect(() => {
+    loadContacts();
+    loadUsers();
+  }, [loadContacts, loadUsers]);
+
+  const handleAssignContact = async (userId: number) => {
     if (!selectedContact) return;
 
     try {
@@ -98,7 +80,10 @@ export default function ContactsManagement() {
     if (!selectedContact || !followUpMessage.trim()) return;
 
     try {
-      await contactService.sendFollowUp(selectedContact.id, followUpMessage);
+      await contactService.sendFollowUpEmail(
+        selectedContact.id,
+        followUpMessage
+      );
       Swal.fire({
         icon: "success",
         title: "¡Enviado!",
@@ -117,7 +102,7 @@ export default function ContactsManagement() {
     }
   };
 
-  const handleDeleteContact = async (contactId: string) => {
+  const handleDeleteContact = async (contactId: number) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción no se puede deshacer",
@@ -247,9 +232,7 @@ export default function ContactsManagement() {
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {contact.assignedUser
-                        ? contact.assignedUser.name
-                        : "Sin asignar"}
+                      {contact.assigned_username || "Sin asignar"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap">
                       {getStatusBadge(contact.status)}
@@ -280,7 +263,7 @@ export default function ContactsManagement() {
                           Seguimiento
                         </button>
                         {(currentUser?.role === "admin" ||
-                          contact.assignedUserId === currentUser?.id) && (
+                          contact.assigned_to === currentUser?.id) && (
                           <button
                             onClick={() => handleDeleteContact(contact.id)}
                             className="text-red-600 hover:text-red-900"
@@ -318,7 +301,7 @@ export default function ContactsManagement() {
                   onClick={() => handleAssignContact(user.id)}
                   className="w-full text-left p-3 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
                 >
-                  <div className="font-medium">{user.name}</div>
+                  <div className="font-medium">{user.username}</div>
                   <div className="text-sm text-gray-500">{user.email}</div>
                 </button>
               ))}
