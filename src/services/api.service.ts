@@ -1,19 +1,9 @@
 import apiClient from '../api/ApiClient';
+import type { User } from '../types/auth';
 
 export interface LoginCredentials {
   username: string;
   password: string;
-}
-
-export interface User {
-  id: number;
-  username: string;
-  email: string;
-  password_hash?: string;
-  role: 'admin' | 'manager' | 'agent';
-  is_active: boolean;
-  created_at?: string;
-  updated_at?: string;
 }
 
 export interface LoginResponse {
@@ -22,8 +12,6 @@ export interface LoginResponse {
   user?: User;
   message: string;
 }
-
-export interface AuthResponse extends LoginResponse {}
 
 export interface ContactFormData {
   fullName: string;

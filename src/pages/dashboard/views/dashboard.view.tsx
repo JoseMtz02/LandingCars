@@ -445,7 +445,9 @@ const DashboardView = () => {
                 <UserCheck className="w-5 h-5 text-white" />
               </div>
               <div>
-                <p className="text-sm font-medium text-gray-900">{user.name}</p>
+                <p className="text-sm font-medium text-gray-900">
+                  {user.username}
+                </p>
                 <p className="text-xs text-gray-500">{user.role}</p>
               </div>
             </div>

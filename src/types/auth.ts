@@ -1,8 +1,12 @@
 export interface User {
-  id: string;
+  id: number;
+  username: string;
   email: string;
-  name: string;
-  role: 'admin' | 'user';
+  password_hash?: string;
+  role: 'admin' | 'manager' | 'agent';
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface LoginCredentials {

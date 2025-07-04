@@ -30,7 +30,7 @@ export const AuthPersistenceDebugger = () => {
           <strong>Estado Actual:</strong>
           <div className="ml-2">
             <div>Autenticado: {isAuthenticated ? "✅" : "❌"}</div>
-            <div>Usuario: {user?.name || "N/A"}</div>
+            <div>Usuario: {user?.username || "N/A"}</div>
             <div>Token: {token ? "✅" : "❌"}</div>
             <div>
               Última verificación:{" "}

@@ -1,21 +1,14 @@
 import React, { useState, useEffect } from "react";
 import { usersService } from "../../../services/api.service";
 import { useAuth } from "../../../hooks/useAuth";
+import type { User } from "../../../types/auth";
 import Swal from "sweetalert2";
 
-interface User {
-  id: string;
-  name: string;
-  email: string;
-  role: "admin" | "user";
-  createdAt: string;
-}
-
 interface UserFormData {
-  name: string;
+  username: string;
   email: string;
   password: string;
-  role: "admin" | "user";
+  role: "admin" | "manager" | "agent";
 }
 
 export default function UsersManagement() {
@@ -25,10 +18,10 @@ export default function UsersManagement() {
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [formData, setFormData] = useState<UserFormData>({
-    name: "",
+    username: "",
     email: "",
     password: "",
-    role: "user",
+    role: "agent",
   });
 
   useEffect(() => {
@@ -57,8 +50,8 @@ export default function UsersManagement() {
     try {
       if (editingUser) {
         // Actualizar usuario
-        await usersService.updateUser(editingUser.id, {
-          name: formData.name,
+        await usersService.updateUser(editingUser.id.toString(), {
+          username: formData.username,
           email: formData.email,
           role: formData.role,
           ...(formData.password && { password: formData.password }),
@@ -93,7 +86,7 @@ export default function UsersManagement() {
   const handleEdit = (user: User) => {
     setEditingUser(user);
     setFormData({
-      name: user.name,
+      username: user.username,
       email: user.email,
       password: "",
       role: user.role,
@@ -101,7 +94,7 @@ export default function UsersManagement() {
     setShowCreateForm(true);
   };
 
-  const handleDelete = async (userId: string) => {
+  const handleDelete = async (userId: number) => {
     if (userId === currentUser?.id) {
       Swal.fire({
         icon: "error",
@@ -124,7 +117,7 @@ export default function UsersManagement() {
 
     if (result.isConfirmed) {
       try {
-        await usersService.deleteUser(userId);
+        await usersService.deleteUser(userId.toString());
         Swal.fire({
           icon: "success",
           title: "¡Eliminado!",
@@ -144,10 +137,10 @@ export default function UsersManagement() {
 
   const resetForm = () => {
     setFormData({
-      name: "",
+      username: "",
       email: "",
       password: "",
-      role: "user",
+      role: "agent",
     });
     setEditingUser(null);
     setShowCreateForm(false);
@@ -207,12 +200,12 @@ export default function UsersManagement() {
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-1">
-                  Nombre
+                  Nombre de Usuario
                 </label>
                 <input
                   type="text"
-                  name="name"
-                  value={formData.name}
+                  name="username"
+                  value={formData.username}
                   onChange={handleChange}
                   required
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
@@ -254,7 +247,8 @@ export default function UsersManagement() {
                   onChange={handleChange}
                   className="w-full border border-gray-300 rounded-lg px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500"
                 >
-                  <option value="user">Usuario</option>
+                  <option value="agent">Agente</option>
+                  <option value="manager">Manager</option>
                   <option value="admin">Administrador</option>
                 </select>
               </div>
@@ -320,12 +314,12 @@ export default function UsersManagement() {
                       <div className="flex items-center">
                         <div className="h-10 w-10 rounded-full bg-blue-600 flex items-center justify-center">
                           <span className="text-white font-medium">
-                            {user.name.charAt(0).toUpperCase()}
+                            {user.username.charAt(0).toUpperCase()}
                           </span>
                         </div>
                         <div className="ml-4">
                           <div className="text-sm font-medium text-gray-900">
-                            {user.name}
+                            {user.username}
                           </div>
                           {user.id === currentUser?.id && (
                             <div className="text-xs text-blue-600">(Tú)</div>
@@ -348,7 +342,9 @@ export default function UsersManagement() {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(user.createdAt).toLocaleDateString("es-MX")}
+                      {user.created_at
+                        ? new Date(user.created_at).toLocaleDateString("es-MX")
+                        : "N/A"}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm font-medium space-x-2">
                       <button

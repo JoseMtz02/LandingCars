@@ -1,17 +1,8 @@
 import React, { useState, useEffect } from "react";
 import type { ReactNode } from "react";
 import { authService } from "../services/api.service";
-import type { User, LoginCredentials } from "../services/api.service";
+import type { User, LoginCredentials, AuthContextType } from "../types/auth";
 import { AuthContext } from "./AuthContextDefinition";
-
-interface AuthContextType {
-  user: User | null;
-  isAuthenticated: boolean;
-  isLoading: boolean;
-  login: (credentials: LoginCredentials) => Promise<void>;
-  logout: () => Promise<void>;
-  refreshUser: () => Promise<void>;
-}
 
 interface AuthProviderProps {
   children: ReactNode;
@@ -49,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       const response = await authService.login(credentials);
-      setUser(response.user);
+      setUser(response.user || null);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;
