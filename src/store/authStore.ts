@@ -9,6 +9,7 @@ interface AuthState {
   isLoading: boolean;
   token: string | null;
   lastAuthCheck: number | null;
+  lastLoginTime: number | null; // Nueva propiedad para rastrear logins recientes
   login: (credentials: LoginCredentials) => Promise<void>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
@@ -21,6 +22,9 @@ interface AuthState {
 // Tiempo de vida del cache de autenticación (30 minutos)
 const AUTH_CACHE_TTL = 30 * 60 * 1000;
 
+// Variable para prevenir inicializaciones concurrentes
+let isInitializing = false;
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set, get) => ({
@@ -29,6 +33,7 @@ export const useAuthStore = create<AuthState>()(
       isLoading: true,
       token: null,
       lastAuthCheck: null,
+      lastLoginTime: null,
 
       setUser: (user: User | null) => {
         const token = user ? get().token : null;
@@ -50,37 +55,53 @@ export const useAuthStore = create<AuthState>()(
           isAuthenticated: false,
           token: null,
           lastAuthCheck: null,
+          lastLoginTime: null,
           isLoading: false
         });
       },
 
       initializeAuth: async () => {
+        // Prevenir inicializaciones concurrentes
+        if (isInitializing) {
+          console.log('🔄 InitializeAuth already in progress, skipping...');
+          return;
+        }
+        
+        isInitializing = true;
         console.log('🔄 InitializeAuth started');
         set({ isLoading: true });
+        
         try {
           const state = get();
           console.log('📊 Current state:', {
             hasUser: !!state.user,
             hasToken: !!state.token,
             isAuthenticated: state.isAuthenticated,
-            lastAuthCheck: state.lastAuthCheck ? new Date(state.lastAuthCheck).toISOString() : null
+            lastAuthCheck: state.lastAuthCheck ? new Date(state.lastAuthCheck).toISOString() : null,
+            lastLoginTime: state.lastLoginTime ? new Date(state.lastLoginTime).toISOString() : null
           });
           
           // Si tenemos datos en el store de Zustand, usarlos como fuente de verdad
           if (state.token && state.user) {
-            // Verificar si el cache sigue siendo válido
+            // Verificar si el cache sigue siendo válido (incluyendo logins recientes)
             const cacheValid = state.lastAuthCheck && 
               (Date.now() - state.lastAuthCheck) < AUTH_CACHE_TTL;
             
+            // Verificar si es un login muy reciente (menos de 60 segundos)
+            const isRecentLogin = state.lastLoginTime && 
+              (Date.now() - state.lastLoginTime) < 60000; // 60 segundos
+            
             console.log('💰 Cache check:', {
               cacheValid,
+              isRecentLogin,
               timeSinceLastCheck: state.lastAuthCheck ? Date.now() - state.lastAuthCheck : null,
+              timeSinceLogin: state.lastLoginTime ? Date.now() - state.lastLoginTime : null,
               cacheTTL: AUTH_CACHE_TTL
             });
             
-            if (cacheValid) {
-              // Cache válido, usar datos existentes
-              console.log('✅ Using cached auth data');
+            if (cacheValid || isRecentLogin) {
+              // Cache válido o login reciente, usar datos existentes sin verificación
+              console.log('✅ Using cached auth data (valid cache or recent login)');
               authService.setInternalToken(state.token);
               set({ isLoading: false });
               return;
@@ -141,6 +162,8 @@ export const useAuthStore = create<AuthState>()(
           get().clearAuthState();
           authService.clearInternalToken();
           set({ isLoading: false });
+        } finally {
+          isInitializing = false;
         }
       },
 
@@ -156,19 +179,23 @@ export const useAuthStore = create<AuthState>()(
             // Primero configurar el token en el servicio
             authService.setInternalToken(response.data.token);
             
+            const now = Date.now();
+            
             // Luego actualizar el estado de Zustand
             set({ 
               user: response.data.user, 
               isAuthenticated: true,
               token: response.data.token,
-              lastAuthCheck: Date.now(),
+              lastAuthCheck: now,
+              lastLoginTime: now, // Marcar el tiempo de login
               isLoading: false 
             });
             
             console.log('📊 Auth state after login:', {
               hasUser: !!response.data.user,
               hasToken: !!response.data.token,
-              isAuthenticated: true
+              isAuthenticated: true,
+              loginTime: new Date(now).toISOString()
             });
             
           } else {
@@ -243,7 +270,8 @@ export const useAuthStore = create<AuthState>()(
         user: state.user,
         token: state.token,
         isAuthenticated: state.isAuthenticated,
-        lastAuthCheck: state.lastAuthCheck
+        lastAuthCheck: state.lastAuthCheck,
+        lastLoginTime: state.lastLoginTime
       }),
       onRehydrateStorage: () => (state, error) => {
         if (error) {
@@ -267,7 +295,7 @@ export const useAuthStore = create<AuthState>()(
       },
       // Configuraciones adicionales para mejorar la persistencia
       skipHydration: false,
-      version: 1, // Versión del schema para futuras migraciones
+      version: 2, // Versión del schema para futuras migraciones (incrementada por lastLoginTime)
     }
   )
 );

@@ -8,16 +8,29 @@ interface AuthInitializerProps {
 export const AuthInitializer: React.FC<AuthInitializerProps> = ({
   children,
 }) => {
-  const { initializeAuth, isLoading } = useAuthStore();
+  const { initializeAuth, isLoading, isAuthenticated, user, token } =
+    useAuthStore();
   const hasInitialized = useRef(false);
 
   useEffect(() => {
+    // Solo inicializar si no se ha hecho antes Y no hay datos de autenticación válidos
     if (!hasInitialized.current) {
+      // Verificar si ya tenemos datos válidos antes de inicializar
+      if (isAuthenticated && user && token) {
+        console.log(
+          "� AuthInitializer: User already authenticated, skipping initialization"
+        );
+        hasInitialized.current = true;
+        return;
+      }
+
       hasInitialized.current = true;
+      console.log("� AuthInitializer: Starting initialization...");
       initializeAuth();
     }
-  }, [initializeAuth]);
+  }, [initializeAuth, isAuthenticated, user, token]);
 
+  // Si está cargando, mostrar la pantalla de carga
   if (isLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800">
