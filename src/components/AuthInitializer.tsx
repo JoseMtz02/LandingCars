@@ -8,27 +8,52 @@ interface AuthInitializerProps {
 export const AuthInitializer: React.FC<AuthInitializerProps> = ({
   children,
 }) => {
-  const { initializeAuth, isLoading, isAuthenticated, user, token } =
-    useAuthStore();
+  const {
+    initializeAuth,
+    isLoading,
+    isAuthenticated,
+    user,
+    token,
+    setLoading,
+  } = useAuthStore();
   const hasInitialized = useRef(false);
 
+  // Efecto para manejar el estado hidratado inmediatamente
   useEffect(() => {
-    // Solo inicializar si no se ha hecho antes Y no hay datos de autenticación válidos
+    // Si tenemos datos válidos y aún está cargando, cambiar isLoading a false inmediatamente
+    if (
+      isAuthenticated &&
+      user &&
+      token &&
+      isLoading &&
+      !hasInitialized.current
+    ) {
+      console.log(
+        "⚡ AuthInitializer: Quick load - found valid auth data, stopping loading"
+      );
+      setLoading(false);
+      hasInitialized.current = true;
+    }
+  }, [isAuthenticated, user, token, isLoading, setLoading]);
+
+  useEffect(() => {
+    // Solo inicializar si no se ha hecho antes
     if (!hasInitialized.current) {
+      hasInitialized.current = true;
+
       // Verificar si ya tenemos datos válidos antes de inicializar
       if (isAuthenticated && user && token) {
         console.log(
-          "� AuthInitializer: User already authenticated, skipping initialization"
+          "🔒 AuthInitializer: User already authenticated, skipping initialization"
         );
-        hasInitialized.current = true;
+        setLoading(false); // Asegurar que isLoading se ponga en false
         return;
       }
 
-      hasInitialized.current = true;
-      console.log("� AuthInitializer: Starting initialization...");
+      console.log("🚀 AuthInitializer: Starting initialization...");
       initializeAuth();
     }
-  }, [initializeAuth, isAuthenticated, user, token]);
+  }, [initializeAuth, isAuthenticated, user, token, setLoading]);
 
   // Si está cargando, mostrar la pantalla de carga
   if (isLoading) {

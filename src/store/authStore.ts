@@ -289,6 +289,12 @@ export const useAuthStore = create<AuthState>()(
           if (state.token) {
             authService.setInternalToken(state.token);
           }
+          // Si tenemos datos válidos después de la hidratación, iniciar con isLoading: false
+          if (state.user && state.token && state.isAuthenticated) {
+            console.log('🔄 Valid data found after hydration, setting isLoading to false');
+            // No llamamos set aquí porque se ejecuta antes de que el store esté completamente hidratado
+            // En su lugar, el AuthInitializer manejará esto
+          }
         } else {
           console.log('No auth state to rehydrate');
         }
