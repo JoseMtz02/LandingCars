@@ -46,11 +46,11 @@ const ResetPasswordView = () => {
       return;
     }
 
-    if (passwords.password.length < 6) {
+    if (passwords.password.length < 8) {
       Swal.fire({
         icon: "error",
         title: "Error",
-        text: "La contraseña debe tener al menos 6 caracteres",
+        text: "La contraseña debe tener al menos 8 caracteres",
         confirmButtonColor: "#2563eb",
       });
       return;

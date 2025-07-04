@@ -6,17 +6,24 @@ export interface LoginCredentials {
 }
 
 export interface User {
-  id: string;
+  id: number;
+  username: string;
   email: string;
-  name: string;
-  role: 'admin' | 'user';
+  password_hash?: string;
+  role: 'admin' | 'manager' | 'agent';
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
-export interface AuthResponse {
-  user: User;
-  token: string;
+export interface LoginResponse {
+  success: boolean;
+  token?: string;
+  user?: User;
   message: string;
 }
+
+export interface AuthResponse extends LoginResponse {}
 
 export interface ContactFormData {
   fullName: string;
@@ -50,18 +57,39 @@ class AuthService {
     apiClient.clearAuthToken();
   }
 
-  async login(credentials: LoginCredentials): Promise<AuthResponse> {
+  async login(credentials: LoginCredentials): Promise<LoginResponse> {
     try {
-      const response = await apiClient.post<AuthResponse>('auth/login', credentials);
+      const response = await apiClient.post<LoginResponse>('auth/login', credentials);
       
-      if (response.data && response.data.token) {
+      // Verificar si el login fue exitoso según el backend Flask
+      if (response.data.success && response.data.token && response.data.user) {
         this.token = response.data.token;
         apiClient.setAuthToken(this.token);
+        return response.data;
+      } else {
+        // Si no fue exitoso, lanzar error con el mensaje del backend
+        throw new Error(response.data.message || 'Credenciales inválidas');
+      }
+    } catch (error: unknown) {
+      console.error('Login error:', error);
+      
+      // Manejar errores HTTP del backend Flask
+      if (error && typeof error === 'object' && 'status' in error) {
+        const apiError = error as { status: number; data?: string };
+        
+        if (apiError.status === 401) {
+          throw new Error('Credenciales inválidas');
+        } else if (apiError.status === 400) {
+          // Parsear el mensaje de error del backend si está disponible
+          try {
+            const errorData = typeof apiError.data === 'string' ? JSON.parse(apiError.data) : apiError.data;
+            throw new Error((errorData as { message?: string }).message || 'Datos de login inválidos');
+          } catch {
+            throw new Error('Datos de login inválidos');
+          }
+        }
       }
       
-      return response.data;
-    } catch (error) {
-      console.error('Login error:', error);
       throw error;
     }
   }
@@ -69,10 +97,12 @@ class AuthService {
   async logout(): Promise<void> {
     try {
       if (this.token) {
+        // Llamar al endpoint de logout del backend
         await apiClient.post('auth/logout');
       }
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Logout error:', error);
+      // No lanzar error en logout, siempre limpiar el token local
     } finally {
       this.token = null;
       apiClient.clearAuthToken();
@@ -87,18 +117,48 @@ class AuthService {
 
       const response = await apiClient.get<User>('auth/me');
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Get current user error:', error);
+      
+      // Manejar errores específicos del backend Flask
+      if (error && typeof error === 'object' && 'status' in error) {
+        const apiError = error as { status: number };
+        
+        if (apiError.status === 401) {
+          // Token expirado o inválido
+          throw new Error('Sesión expirada');
+        }
+      }
+      
       throw error; // No limpiar la sesión aquí, dejar que Zustand lo maneje
     }
   }
 
   async forgotPassword(identifier: string): Promise<{ success: boolean; message: string }> {
     try {
-      const response = await apiClient.post<{ success: boolean; message: string }>('auth/forgot-password', { identifier });
+      const response = await apiClient.post<{ success: boolean; message: string }>('auth/forgot-password', { 
+        identifier 
+      });
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Forgot password error:', error);
+      
+      // Manejar errores específicos del backend Flask
+      if (error && typeof error === 'object' && 'status' in error) {
+        const apiError = error as { status: number; data?: string };
+        
+        if (apiError.status === 404) {
+          throw new Error('Usuario no encontrado');
+        } else if (apiError.status === 400) {
+          try {
+            const errorData = typeof apiError.data === 'string' ? JSON.parse(apiError.data) : apiError.data;
+            throw new Error((errorData as { message?: string }).message || 'Datos inválidos');
+          } catch {
+            throw new Error('Datos inválidos');
+          }
+        }
+      }
+      
       throw error;
     }
   }
@@ -107,11 +167,32 @@ class AuthService {
     try {
       const response = await apiClient.post<{ success: boolean; message: string }>('auth/reset-password', { 
         token, 
-        newPassword 
+        new_password: newPassword  // El backend espera 'new_password'
       });
       return response.data;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error('Reset password error:', error);
+      
+      // Manejar errores específicos del backend Flask
+      if (error && typeof error === 'object' && 'status' in error) {
+        const apiError = error as { status: number; data?: string };
+        
+        if (apiError.status === 400) {
+          try {
+            const errorData = typeof apiError.data === 'string' ? JSON.parse(apiError.data) : apiError.data;
+            const errorMsg = (errorData as { message?: string }).message;
+            
+            if (errorMsg?.includes('expired') || errorMsg?.includes('invalid')) {
+              throw new Error('El token de recuperación ha expirado o es inválido');
+            }
+            
+            throw new Error(errorMsg || 'Datos inválidos');
+          } catch {
+            throw new Error('El token de recuperación ha expirado o es inválido');
+          }
+        }
+      }
+      
       throw error;
     }
   }
