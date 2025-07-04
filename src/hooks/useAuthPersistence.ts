@@ -14,7 +14,6 @@ export const useAuthPersistence = () => {
     // Verificar si hay cambios en el estado de autenticación desde otras tabs
     const handleStorageChange = (e: StorageEvent) => {
       if (e.key === 'titan-auth-storage' && e.oldValue !== e.newValue) {
-        console.log('External storage change detected, reinitializing auth...');
         // Solo reinicializar si hay un cambio real desde otra tab
         initializeAuth();
       }

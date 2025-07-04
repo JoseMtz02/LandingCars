@@ -3,7 +3,6 @@ import { motion } from "framer-motion";
 import { Car, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
-// import { useSmartRedirect } from "../../../hooks/useSmartRedirect"; // COMENTADO TEMPORALMENTE
 import Swal from "sweetalert2";
 
 const LoginView = () => {
@@ -16,25 +15,12 @@ const LoginView = () => {
   const { login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Hook de redirección inteligente - COMENTADO TEMPORALMENTE PARA DEBUG
-  /*
-  useSmartRedirect({
-    redirectWhenAuthenticated: true,
-    redirectTo: "/dashboard",
-  });
-  */
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-    console.log("🔑 Login form submitted with credentials:", {
-      username: credentials.username,
-    });
 
     try {
-      console.log("🔄 Calling login function...");
       await login(credentials);
-      console.log("✅ Login successful, showing success message");
 
       Swal.fire({
         icon: "success",
@@ -45,16 +31,13 @@ const LoginView = () => {
         showConfirmButton: false,
       });
 
-      // Redirección inteligente con URL de destino guardada
       setTimeout(() => {
         const intendedPath = sessionStorage.getItem("intendedPath");
         const targetPath = intendedPath || "/dashboard";
-        console.log("🔄 Redirecting to:", targetPath);
         sessionStorage.removeItem("intendedPath");
         navigate(targetPath, { replace: true });
       }, 1000);
-    } catch (error) {
-      console.error("💥 Login error:", error);
+    } catch {
       Swal.fire({
         icon: "error",
         title: "Error de autenticación",
@@ -66,7 +49,6 @@ const LoginView = () => {
     }
   };
 
-  // Mostrar loading mientras se verifica la autenticación
   if (authLoading) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-slate-900 via-blue-900 to-slate-800 flex items-center justify-center">

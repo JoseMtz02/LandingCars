@@ -18,38 +18,17 @@ export default function ProtectedRoute({
   // Hook de redirección inteligente - COMENTADO TEMPORALMENTE PARA DEBUG
   // useAuthRedirect();
 
-  // Debug logging
-  console.log("🛡️ ProtectedRoute check:", {
-    isLoading,
-    isAuthenticated,
-    hasUser: !!user,
-    userRole: user?.role,
-    requireAdmin,
-  });
-
   useEffect(() => {
     if (!isLoading) {
-      console.log("🛡️ ProtectedRoute effect triggered:", {
-        isAuthenticated,
-        hasUser: !!user,
-        userRole: user?.role,
-      });
-
       if (!isAuthenticated) {
-        console.log("❌ Not authenticated, redirecting to login");
         navigate("/auth/login", { replace: true });
         return;
       }
 
       if (requireAdmin && user?.role !== "admin") {
-        console.log(
-          "❌ Admin required but user is not admin, redirecting to dashboard"
-        );
         navigate("/dashboard", { replace: true });
         return;
       }
-
-      console.log("✅ Access granted");
     }
   }, [isAuthenticated, isLoading, user, navigate, requireAdmin]);
 
