@@ -40,7 +40,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       const response = await authService.login(credentials);
-      setUser(response.user || null);
+      setUser(response.data.user || null);
     } catch (error) {
       console.error("Login failed:", error);
       throw error;

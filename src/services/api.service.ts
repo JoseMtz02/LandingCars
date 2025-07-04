@@ -51,19 +51,16 @@ class AuthService {
     try {
       const response = await apiClient.post<LoginResponse>('auth/login', credentials);
       
-      // Verificar si el login fue exitoso según el backend Flask
-      if (response.data.success && response.data.token && response.data.user) {
-        this.token = response.data.token;
+      if (response.data.success && response.data.data.token && response.data.data.user) {
+        this.token = response.data.data.token;
         apiClient.setAuthToken(this.token);
         return response.data;
       } else {
-        // Si no fue exitoso, lanzar error con el mensaje del backend
         throw new Error(response.data.message || 'Credenciales inválidas');
       }
     } catch (error: unknown) {
       console.error('Login error:', error);
       
-      // Manejar errores HTTP del backend Flask
       if (error && typeof error === 'object' && 'status' in error) {
         const apiError = error as { status: number; data?: string };
         
