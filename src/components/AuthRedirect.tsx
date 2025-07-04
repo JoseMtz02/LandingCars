@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { useAuthRedirect } from "../hooks/useAuthRedirect";
 
 interface AuthRedirectProps {
   children: React.ReactNode;
@@ -15,6 +16,9 @@ export const AuthRedirect: React.FC<AuthRedirectProps> = ({
 }) => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
+
+  // Hook de redirección inteligente
+  useAuthRedirect({ redirectTo });
 
   useEffect(() => {
     if (!isLoading && isAuthenticated && redirectWhenAuthenticated) {

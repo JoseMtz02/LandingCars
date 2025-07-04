@@ -1,6 +1,7 @@
 import { useEffect } from "react";
 import { useNavigate } from "react-router";
 import { useAuth } from "../hooks/useAuth";
+import { useAuthRedirect } from "../hooks/useAuthRedirect";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -14,10 +15,13 @@ export default function ProtectedRoute({
   const { user, isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
 
+  // Hook de redirección inteligente
+  useAuthRedirect();
+
   useEffect(() => {
     if (!isLoading) {
       if (!isAuthenticated) {
-        navigate("/login", { replace: true });
+        navigate("/auth/login", { replace: true });
         return;
       }
 

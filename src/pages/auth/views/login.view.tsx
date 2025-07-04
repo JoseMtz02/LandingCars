@@ -1,8 +1,9 @@
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { Car, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
+import { useSmartRedirect } from "../../../hooks/useSmartRedirect";
 import Swal from "sweetalert2";
 
 const LoginView = () => {
@@ -12,15 +13,14 @@ const LoginView = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, isAuthenticated, isLoading: authLoading } = useAuth();
+  const { login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Redirigir automáticamente al dashboard si ya está autenticado
-  useEffect(() => {
-    if (!authLoading && isAuthenticated) {
-      navigate("/dashboard", { replace: true });
-    }
-  }, [isAuthenticated, authLoading, navigate]);
+  // Hook de redirección inteligente
+  useSmartRedirect({
+    redirectWhenAuthenticated: true,
+    redirectTo: "/dashboard",
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -33,10 +33,17 @@ const LoginView = () => {
         title: "¡Bienvenido!",
         text: "Has iniciado sesión correctamente",
         confirmButtonColor: "#2563eb",
-        timer: 1500,
+        timer: 1000,
         showConfirmButton: false,
       });
-      // La redirección se manejará automáticamente por el useEffect
+
+      // Redirección inteligente con URL de destino guardada
+      setTimeout(() => {
+        const intendedPath = sessionStorage.getItem("intendedPath");
+        const targetPath = intendedPath || "/dashboard";
+        sessionStorage.removeItem("intendedPath");
+        navigate(targetPath, { replace: true });
+      }, 1000);
     } catch (error) {
       console.error("Login error:", error);
       Swal.fire({
