@@ -11,6 +11,14 @@ export const useAuth = () => {
     initializeAuth
   } = useAuthStore();
 
+  // Debug logging
+  console.log('🎣 useAuth hook called:', {
+    hasUser: !!user,
+    isAuthenticated,
+    isLoading,
+    timestamp: new Date().toISOString()
+  });
+
   return {
     user,
     isAuthenticated,

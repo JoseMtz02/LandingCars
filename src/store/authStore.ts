@@ -45,6 +45,10 @@ export const useAuthStore = create<AuthState>()(
       },
 
       clearAuthState: () => {
+        console.log('🧹 CLEARAUTHSTATE CALLED!', {
+          stack: new Error().stack,
+          timestamp: new Date().toISOString()
+        });
         set({
           user: null,
           isAuthenticated: false,
@@ -143,10 +147,18 @@ export const useAuthStore = create<AuthState>()(
             */
           }
           
-          // No hay datos válidos, limpiar estado
-          console.log('🧹 No valid data found, clearing state');
-          get().clearAuthState();
-          authService.clearInternalToken();
+          // No hay datos válidos, limpiar estado SOLO si realmente no hay nada
+          if (!state.token && !state.user && !state.isAuthenticated) {
+            console.log('🧹 No valid data found, clearing state');
+            get().clearAuthState();
+            authService.clearInternalToken();
+          } else {
+            console.log('⚠️ Datos encontrados pero no procesados correctamente:', {
+              hasToken: !!state.token,
+              hasUser: !!state.user,
+              isAuthenticated: state.isAuthenticated
+            });
+          }
           set({ isLoading: false });
         } catch (error) {
           console.error('💥 Error initializing auth:', error);

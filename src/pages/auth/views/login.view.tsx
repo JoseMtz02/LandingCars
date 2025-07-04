@@ -3,7 +3,7 @@ import { motion } from "framer-motion";
 import { Car, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
 import { Link, useNavigate } from "react-router";
 import { useAuth } from "../../../hooks/useAuth";
-import { useSmartRedirect } from "../../../hooks/useSmartRedirect";
+// import { useSmartRedirect } from "../../../hooks/useSmartRedirect"; // COMENTADO TEMPORALMENTE
 import Swal from "sweetalert2";
 
 const LoginView = () => {
@@ -16,11 +16,13 @@ const LoginView = () => {
   const { login, isLoading: authLoading } = useAuth();
   const navigate = useNavigate();
 
-  // Hook de redirección inteligente
+  // Hook de redirección inteligente - COMENTADO TEMPORALMENTE PARA DEBUG
+  /*
   useSmartRedirect({
     redirectWhenAuthenticated: true,
     redirectTo: "/dashboard",
   });
+  */
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
