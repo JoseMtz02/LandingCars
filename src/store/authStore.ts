@@ -110,19 +110,17 @@ export const useAuthStore = create<AuthState>()(
           set({ isLoading: true });
           const response = await authService.login(credentials);
           
-          // Verificar que el login fue exitoso y tenemos los datos necesarios
-          if (response.success && response.user && response.token) {
-            // Zustand manejará la persistencia automáticamente
+          if (response.success) {
+
             set({ 
-              user: response.user, 
+              user: response.data.user, 
               isAuthenticated: true,
-              token: response.token,
+              token: response.data.token,
               lastAuthCheck: Date.now(),
               isLoading: false 
             });
             
-            // Configurar el token en el servicio
-            authService.setInternalToken(response.token);
+            authService.setInternalToken(response.data.token!);
           } else {
             set({ isLoading: false });
             throw new Error(response.message || 'Error en el login');

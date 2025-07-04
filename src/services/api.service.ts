@@ -8,9 +8,11 @@ export interface LoginCredentials {
 
 export interface LoginResponse {
   success: boolean;
-  token?: string;
-  user?: User;
   message: string;
+  data: {
+    token?: string;
+    user?: User;
+  }
 }
 
 export interface ContactFormData {
