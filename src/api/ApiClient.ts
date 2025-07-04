@@ -1,8 +1,4 @@
-import { mockApiService } from './mockApiService';
-
-// Configuración para usar mock API en desarrollo
-const USE_MOCK_API = import.meta.env.DEV && import.meta.env.VITE_USE_MOCK_API !== 'false';
-
+// Configuración para API real
 interface ApiResponse<T = unknown> {
   data: T;
   status: number;
@@ -33,49 +29,12 @@ class ApiClient {
     this.authToken = undefined;
   }
 
-  private async handleMockRequest<T>(
-    method: string,
-    endpoint: string,
-    data?: unknown
-  ): Promise<ApiResponse<T>> {
-    console.log(`[MOCK API] ${method} ${endpoint}`, data);
-
-    // Simular autenticación
-    if (endpoint === 'auth/login' && method === 'POST') {
-      return mockApiService.login(data as { username: string; password: string }) as Promise<ApiResponse<T>>;
-    }
-
-    if (endpoint === 'auth/me' && method === 'GET') {
-      if (!this.authToken) {
-        throw new Error('No hay token de autenticación');
-      }
-      return mockApiService.getCurrentUser(this.authToken) as Promise<ApiResponse<T>>;
-    }
-
-    if (endpoint === 'auth/logout' && method === 'POST') {
-      return mockApiService.logout() as Promise<ApiResponse<T>>;
-    }
-
-    // Para otros endpoints, retornar datos mock básicos
-    return {
-      data: {} as T,
-      status: 200,
-      statusText: 'OK',
-      headers: {}
-    };
-  }
-
   private async makeRequest<T>(
     method: string,
     endpoint: string,
     data?: unknown,
     options: RequestInit = {}
   ): Promise<ApiResponse<T>> {
-    // Usar mock API en desarrollo
-    if (USE_MOCK_API) {
-      return this.handleMockRequest<T>(method, endpoint, data);
-    }
-
     const url = `${this.baseURL}/${endpoint}`;
     const headers: Record<string, string> = {
       'Content-Type': 'application/json',
@@ -142,10 +101,5 @@ class ApiClient {
 
 // Crear instancia singleton
 const apiClient = new ApiClient();
-
-// Habilitar mock API por defecto en desarrollo
-if (USE_MOCK_API) {
-  console.log('🔧 Usando Mock API para desarrollo');
-}
 
 export default apiClient;
