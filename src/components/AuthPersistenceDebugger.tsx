@@ -1,8 +1,6 @@
 import { useAuthStore } from "../store/authStore";
-import { useAuthPersistence } from "../hooks/useAuthPersistence";
 
 export const AuthPersistenceDebugger = () => {
-  const { clearCache } = useAuthPersistence();
   const { user, token, isAuthenticated, lastAuthCheck } = useAuthStore();
 
   // Solo mostrar en desarrollo
@@ -20,6 +18,11 @@ export const AuthPersistenceDebugger = () => {
   };
 
   const storedData = getStoredData();
+
+  const clearStorage = () => {
+    localStorage.removeItem("titan-auth-storage");
+    window.location.reload();
+  };
 
   return (
     <div className="fixed bottom-4 right-4 bg-black/80 text-white p-4 rounded-lg text-xs z-50 max-w-md">
@@ -59,10 +62,10 @@ export const AuthPersistenceDebugger = () => {
 
         <div className="pt-2 border-t border-gray-600">
           <button
-            onClick={clearCache}
+            onClick={clearStorage}
             className="bg-red-600 hover:bg-red-700 px-2 py-1 rounded text-xs"
           >
-            Limpiar Cache
+            Limpiar Cache y Recargar
           </button>
         </div>
       </div>

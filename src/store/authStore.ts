@@ -18,8 +18,8 @@ interface AuthState {
   clearAuthState: () => void;
 }
 
-// Tiempo de vida del cache de autenticación (5 minutos)
-const AUTH_CACHE_TTL = 5 * 60 * 1000;
+// Tiempo de vida del cache de autenticación (30 minutos)
+const AUTH_CACHE_TTL = 30 * 60 * 1000;
 
 export const useAuthStore = create<AuthState>()(
   persist(
@@ -72,7 +72,7 @@ export const useAuthStore = create<AuthState>()(
               return;
             }
             
-            // Cache expirado, verificar con el servidor
+            // Cache expirado, verificar con el servidor solo si es necesario
             try {
               authService.setInternalToken(state.token);
               const currentUser = await authService.getCurrentUser();
@@ -88,8 +88,10 @@ export const useAuthStore = create<AuthState>()(
               }
             } catch (tokenError) {
               console.log('Token expired or invalid, cleaning up...', tokenError);
-              // Token expirado, limpiar
-              await get().logout();
+              // Token expirado, limpiar solo una vez
+              get().clearAuthState();
+              authService.clearInternalToken();
+              set({ isLoading: false });
               return;
             }
           }
@@ -97,11 +99,12 @@ export const useAuthStore = create<AuthState>()(
           // No hay datos válidos, limpiar estado
           get().clearAuthState();
           authService.clearInternalToken();
-          
+          set({ isLoading: false });
         } catch (error) {
           console.error('Error initializing auth:', error);
           get().clearAuthState();
           authService.clearInternalToken();
+          set({ isLoading: false });
         }
       },
 

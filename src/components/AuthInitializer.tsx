@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useAuthStore } from "../store/authStore";
 
 interface AuthInitializerProps {
@@ -9,9 +9,13 @@ export const AuthInitializer: React.FC<AuthInitializerProps> = ({
   children,
 }) => {
   const { initializeAuth, isLoading } = useAuthStore();
+  const hasInitialized = useRef(false);
 
   useEffect(() => {
-    initializeAuth();
+    if (!hasInitialized.current) {
+      hasInitialized.current = true;
+      initializeAuth();
+    }
   }, [initializeAuth]);
 
   if (isLoading) {

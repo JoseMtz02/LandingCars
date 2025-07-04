@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useNavigate, useLocation } from "react-router";
 import { useAuth } from "./useAuth";
 
@@ -12,9 +12,11 @@ export const useAuthRedirect = (options: UseAuthRedirectOptions = {}) => {
   const { isAuthenticated, isLoading } = useAuth();
   const navigate = useNavigate();
   const location = useLocation();
+  const hasRedirected = useRef(false);
 
   useEffect(() => {
-    if (!isLoading) {
+    // Solo proceder si no está cargando y no hemos redirigido aún
+    if (!isLoading && !hasRedirected.current) {
       if (isAuthenticated) {
         // Si el usuario está autenticado y está en una página de auth, redirigir al dashboard
         if (location.pathname.startsWith("/auth") || location.pathname === "/login") {
@@ -25,6 +27,7 @@ export const useAuthRedirect = (options: UseAuthRedirectOptions = {}) => {
           // Limpiar la URL de retorno guardada
           sessionStorage.removeItem("intendedPath");
           
+          hasRedirected.current = true;
           navigate(targetPath, { replace: true });
         }
       } else {
@@ -35,11 +38,17 @@ export const useAuthRedirect = (options: UseAuthRedirectOptions = {}) => {
         if (isProtectedPath) {
           // Guardar la ruta donde el usuario intentaba ir
           sessionStorage.setItem("intendedPath", location.pathname);
+          hasRedirected.current = true;
           navigate(fallbackPath, { replace: true });
         }
       }
     }
   }, [isAuthenticated, isLoading, navigate, location.pathname, redirectTo, fallbackPath]);
+
+  // Reset the redirect flag when the path changes significantly
+  useEffect(() => {
+    hasRedirected.current = false;
+  }, [location.pathname]);
 
   return {
     isAuthenticated,
