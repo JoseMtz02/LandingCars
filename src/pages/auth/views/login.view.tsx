@@ -25,9 +25,15 @@ const LoginView = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
+    console.log("🔑 Login form submitted with credentials:", {
+      username: credentials.username,
+    });
 
     try {
+      console.log("🔄 Calling login function...");
       await login(credentials);
+      console.log("✅ Login successful, showing success message");
+
       Swal.fire({
         icon: "success",
         title: "¡Bienvenido!",
@@ -41,11 +47,12 @@ const LoginView = () => {
       setTimeout(() => {
         const intendedPath = sessionStorage.getItem("intendedPath");
         const targetPath = intendedPath || "/dashboard";
+        console.log("🔄 Redirecting to:", targetPath);
         sessionStorage.removeItem("intendedPath");
         navigate(targetPath, { replace: true });
       }, 1000);
     } catch (error) {
-      console.error("Login error:", error);
+      console.error("💥 Login error:", error);
       Swal.fire({
         icon: "error",
         title: "Error de autenticación",
