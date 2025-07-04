@@ -98,13 +98,22 @@ export interface User {
   id: number;
   username: string;
   email: string;
-  role: string;
+  password_hash?: string;
+  role: 'admin' | 'manager' | 'agent';
+  is_active: boolean;
+  created_at?: string;
+  updated_at?: string;
 }
 
 export interface Message {
   id: number;
+  content: string;
   contactId: number;
-  message: string;
+  contact: {
+    id: number;
+    fullName: string;
+    email: string;
+  };
   isRead: boolean;
   createdAt: string;
   updatedAt: string;

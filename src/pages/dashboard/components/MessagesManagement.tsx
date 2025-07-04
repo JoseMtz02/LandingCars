@@ -1,28 +1,8 @@
 import { useState, useEffect } from "react";
 import { messagesService, contactService } from "../../../services/api.service";
 import { useAuth } from "../../../hooks/useAuth";
+import type { Contact, Message } from "../../../types/contacts";
 import Swal from "sweetalert2";
-
-interface Message {
-  id: string;
-  content: string;
-  contactId: string;
-  contact: {
-    id: string;
-    fullName: string;
-    email: string;
-  };
-  isRead: boolean;
-  createdAt: string;
-  updatedAt: string;
-}
-
-interface Contact {
-  id: string;
-  fullName: string;
-  email: string;
-  phone: string;
-}
 
 export default function MessagesManagement() {
   const { user: currentUser } = useAuth();
@@ -49,10 +29,13 @@ export default function MessagesManagement() {
   const loadContacts = async () => {
     try {
       setLoading(true);
-      const contactsData =
+      const response =
         currentUser?.role === "admin"
           ? await contactService.getContacts()
           : await contactService.getMyContacts();
+      
+      // Extraer los contactos de la respuesta
+      const contactsData = response.data || [];
       setContacts(contactsData);
     } catch (error) {
       console.error("Error loading contacts:", error);
@@ -75,7 +58,7 @@ export default function MessagesManagement() {
     }
   };
 
-  const loadContactMessages = async (contactId: string) => {
+  const loadContactMessages = async (contactId: number) => {
     try {
       const messagesData = await messagesService.getContactMessages(contactId);
       setMessages(messagesData);
@@ -114,7 +97,7 @@ export default function MessagesManagement() {
     }
   };
 
-  const handleDeleteMessage = async (messageId: string) => {
+  const handleDeleteMessage = async (messageId: number) => {
     const result = await Swal.fire({
       title: "¿Estás seguro?",
       text: "Esta acción no se puede deshacer",

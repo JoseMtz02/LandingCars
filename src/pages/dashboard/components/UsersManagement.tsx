@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { usersService } from "../../../services/api.service";
 import { useAuth } from "../../../hooks/useAuth";
-import type { User } from "../../../types/auth";
+import type { User } from "../../../types/contacts";
 import Swal from "sweetalert2";
 
 interface UserFormData {
@@ -50,7 +50,7 @@ export default function UsersManagement() {
     try {
       if (editingUser) {
         // Actualizar usuario
-        await usersService.updateUser(editingUser.id.toString(), {
+        await usersService.updateUser(editingUser.id, {
           username: formData.username,
           email: formData.email,
           role: formData.role,
@@ -117,7 +117,7 @@ export default function UsersManagement() {
 
     if (result.isConfirmed) {
       try {
-        await usersService.deleteUser(userId.toString());
+        await usersService.deleteUser(userId);
         Swal.fire({
           icon: "success",
           title: "¡Eliminado!",

@@ -366,7 +366,7 @@ class MessagesService {
     }
   }
 
-  async getContactMessages(contactId: string): Promise<Message[]> {
+  async getContactMessages(contactId: number): Promise<Message[]> {
     try {
       const response = await apiClient.get<{ success: boolean; data: Message[] }>(`messages/contact/${contactId}`);
       return response.data.data;
@@ -376,7 +376,7 @@ class MessagesService {
     }
   }
 
-  async createMessage(contactId: string, message: string): Promise<Message> {
+  async createMessage(contactId: number, message: string): Promise<Message> {
     try {
       const response = await apiClient.post<{ success: boolean; data: Message }>(`messages/contact/${contactId}`, { message });
       return response.data.data;
@@ -386,7 +386,7 @@ class MessagesService {
     }
   }
 
-  async markAsRead(contactId: string): Promise<{ success: boolean; message: string }> {
+  async markAsRead(contactId: number): Promise<{ success: boolean; message: string }> {
     try {
       const response = await apiClient.post<{ success: boolean; message: string }>(`messages/contact/${contactId}/mark-read`);
       return response.data;
@@ -396,7 +396,7 @@ class MessagesService {
     }
   }
 
-  async updateMessage(id: string, message: string): Promise<Message> {
+  async updateMessage(id: number, message: string): Promise<Message> {
     try {
       const response = await apiClient.put<{ success: boolean; data: Message }>(`messages/${id}`, { message });
       return response.data.data;
@@ -406,7 +406,7 @@ class MessagesService {
     }
   }
 
-  async deleteMessage(id: string): Promise<{ success: boolean; message: string }> {
+  async deleteMessage(id: number): Promise<{ success: boolean; message: string }> {
     try {
       const response = await apiClient.delete<{ success: boolean; message: string }>(`messages/${id}`);
       return response.data;
@@ -438,7 +438,7 @@ class UsersService {
     }
   }
 
-  async getUserById(id: string): Promise<User> {
+  async getUserById(id: number): Promise<User> {
     try {
       const response = await apiClient.get<{ success: boolean; data: User }>(`auth/users/${id}`);
       return response.data.data;
@@ -448,7 +448,7 @@ class UsersService {
     }
   }
 
-  async updateUser(id: string, userData: UserUpdateData): Promise<User> {
+  async updateUser(id: number, userData: UserUpdateData): Promise<User> {
     try {
       const response = await apiClient.put<{ success: boolean; data: User }>(`auth/users/${id}`, userData);
       return response.data.data;
@@ -458,7 +458,7 @@ class UsersService {
     }
   }
 
-  async deleteUser(id: string): Promise<{ success: boolean; message: string }> {
+  async deleteUser(id: number): Promise<{ success: boolean; message: string }> {
     try {
       const response = await apiClient.delete<{ success: boolean; message: string }>(`auth/users/${id}`);
       return response.data;
