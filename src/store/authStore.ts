@@ -55,9 +55,16 @@ export const useAuthStore = create<AuthState>()(
       },
 
       initializeAuth: async () => {
+        console.log('🔄 InitializeAuth started');
         set({ isLoading: true });
         try {
           const state = get();
+          console.log('📊 Current state:', {
+            hasUser: !!state.user,
+            hasToken: !!state.token,
+            isAuthenticated: state.isAuthenticated,
+            lastAuthCheck: state.lastAuthCheck ? new Date(state.lastAuthCheck).toISOString() : null
+          });
           
           // Si tenemos datos en el store de Zustand, usarlos como fuente de verdad
           if (state.token && state.user) {
@@ -65,18 +72,27 @@ export const useAuthStore = create<AuthState>()(
             const cacheValid = state.lastAuthCheck && 
               (Date.now() - state.lastAuthCheck) < AUTH_CACHE_TTL;
             
+            console.log('💰 Cache check:', {
+              cacheValid,
+              timeSinceLastCheck: state.lastAuthCheck ? Date.now() - state.lastAuthCheck : null,
+              cacheTTL: AUTH_CACHE_TTL
+            });
+            
             if (cacheValid) {
               // Cache válido, usar datos existentes
+              console.log('✅ Using cached auth data');
               authService.setInternalToken(state.token);
               set({ isLoading: false });
               return;
             }
             
             // Cache expirado, verificar con el servidor solo si es necesario
+            console.log('🔍 Cache expired, verifying with server...');
             try {
               authService.setInternalToken(state.token);
               const currentUser = await authService.getCurrentUser();
               if (currentUser) {
+                console.log('✅ User verified successfully');
                 set({ 
                   user: currentUser, 
                   isAuthenticated: true,
@@ -85,23 +101,43 @@ export const useAuthStore = create<AuthState>()(
                   isLoading: false 
                 });
                 return;
+              } else {
+                // Usuario no encontrado pero token técnicamente válido - mantener datos del cache
+                console.log('⚠️ User not found but token valid, keeping cached data');
+                set({ 
+                  isLoading: false,
+                  lastAuthCheck: Date.now() // Actualizar el check para evitar verificaciones constantes
+                });
+                return;
               }
             } catch (tokenError) {
-              console.log('Token expired or invalid, cleaning up...', tokenError);
-              // Token expirado, limpiar solo una vez
-              get().clearAuthState();
-              authService.clearInternalToken();
+              console.log('❌ Token verification failed:', tokenError);
+              // Solo limpiar si es realmente un error de autenticación (401, 403)
+              if (tokenError && typeof tokenError === 'object' && 'status' in tokenError) {
+                const apiError = tokenError as { status: number };
+                if (apiError.status === 401 || apiError.status === 403) {
+                  // Token realmente expirado o inválido
+                  console.log('🧹 Token expired/invalid, clearing auth state');
+                  get().clearAuthState();
+                  authService.clearInternalToken();
+                  set({ isLoading: false });
+                  return;
+                }
+              }
+              // Para otros errores (red, servidor, etc), mantener el estado actual
+              console.log('🌐 Network/server error, keeping current auth state');
               set({ isLoading: false });
               return;
             }
           }
           
           // No hay datos válidos, limpiar estado
+          console.log('🧹 No valid data found, clearing state');
           get().clearAuthState();
           authService.clearInternalToken();
           set({ isLoading: false });
         } catch (error) {
-          console.error('Error initializing auth:', error);
+          console.error('💥 Error initializing auth:', error);
           get().clearAuthState();
           authService.clearInternalToken();
           set({ isLoading: false });
@@ -154,7 +190,9 @@ export const useAuthStore = create<AuthState>()(
         try {
           const state = get();
           if (!state.token) {
-            await get().logout();
+            // No hay token, limpiar estado
+            get().clearAuthState();
+            authService.clearInternalToken();
             return;
           }
           
@@ -167,11 +205,22 @@ export const useAuthStore = create<AuthState>()(
               lastAuthCheck: Date.now()
             });
           } else {
-            await get().logout();
+            // Usuario no encontrado, pero mantener token por si es un error temporal
+            console.log('User not found during refresh, keeping token');
+            set({ lastAuthCheck: Date.now() });
           }
         } catch (error) {
           console.error('Failed to refresh user:', error);
-          await get().logout();
+          // Solo limpiar en errores de autenticación específicos
+          if (error && typeof error === 'object' && 'status' in error) {
+            const apiError = error as { status: number };
+            if (apiError.status === 401 || apiError.status === 403) {
+              await get().logout();
+              return;
+            }
+          }
+          // Para otros errores, mantener el estado actual
+          console.log('Non-auth error during refresh, keeping current state');
         }
       },
     }),
@@ -191,11 +240,17 @@ export const useAuthStore = create<AuthState>()(
         }
         
         if (state) {
-          console.log('Auth state rehydrated successfully');
+          console.log('Auth state rehydrated successfully:', {
+            hasUser: !!state.user,
+            hasToken: !!state.token,
+            isAuthenticated: state.isAuthenticated
+          });
           // Configurar el token en el servicio si existe
           if (state.token) {
             authService.setInternalToken(state.token);
           }
+        } else {
+          console.log('No auth state to rehydrate');
         }
       },
       // Configuraciones adicionales para mejorar la persistencia
