@@ -2,6 +2,7 @@ import { useState, useRef } from "react";
 import ReCAPTCHA from "react-google-recaptcha";
 import { contactService } from "../../../services/api.service";
 import Swal from "sweetalert2";
+import DOMPurify from "dompurify";
 
 interface ContactForm {
   fullName: string;
@@ -33,15 +34,19 @@ export default function ContactFormComponent() {
   const [touched, setTouched] = useState<TouchedFields>({});
 
   const errors = {
-    fullName: form.fullName.trim().length < 3,
-    email: !/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/.test(form.email),
+    fullName: !/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*$/.test(form.fullName) || form.fullName.trim().length < 3 || form.fullName.length > 100,
+    email: !/^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(form.email) || form.email.length > 70,
     phone: !/^\d{10}$/.test(form.phone),
-    message: form.message.trim().length < 10,
+    message: form.message.trim().length < 10 || form.message.length > 1000,
     condiciones: !form.condiciones,
     recaptcha: !form.recaptcha,
   };
 
   const isValid = Object.values(errors).every((v) => v === false);
+
+  const sanitizeInput = (input: string): string => {
+    return DOMPurify.sanitize(input, { ALLOWED_TAGS: [], ALLOWED_ATTR: [] });
+  };
 
   const handleChange = (
     e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
@@ -53,9 +58,15 @@ export default function ContactFormComponent() {
         [name]: (e.target as HTMLInputElement).checked,
       }));
     } else {
+      let sanitizedValue = sanitizeInput(value);
+      if (name === "fullName") {
+        sanitizedValue = sanitizedValue.replace(/[^a-zA-ZáéíóúÁÉÍÓÚñÑ\s]/g, "");
+      } else if (name === "phone") {
+        sanitizedValue = sanitizedValue.replace(/[^0-9]/g, "");
+      }
       setForm((prev) => ({
         ...prev,
-        [name]: value,
+        [name]: sanitizedValue,
       }));
     }
   };
@@ -84,15 +95,18 @@ export default function ContactFormComponent() {
       condiciones: true,
       recaptcha: true,
     });
+
     if (isValid) {
       try {
-        await contactService.submitContact({
-          fullName: form.fullName,
-          email: form.email,
-          phone: form.phone,
-          message: form.message,
-          recaptcha: form.recaptcha,
-        });
+        const sanitizedForm = {
+          fullName: sanitizeInput(form.fullName),
+          email: sanitizeInput(form.email),
+          phone: sanitizeInput(form.phone),
+          message: sanitizeInput(form.message),
+          recaptcha: form.recaptcha, 
+        };
+
+        await contactService.submitContact(sanitizedForm);
 
         Swal.fire({
           icon: "success",
@@ -100,6 +114,7 @@ export default function ContactFormComponent() {
           text: "¡Gracias por contactarnos! Pronto te responderemos.",
           confirmButtonColor: "#2563eb",
         });
+
         setForm({
           fullName: "",
           email: "",
@@ -116,11 +131,9 @@ export default function ContactFormComponent() {
         Swal.fire({
           icon: "error",
           title: "Error",
-          text: "Ocurrió un error inesperado. Inténtalo de nuevo más tarde.",
+          text: "Ocurrió un error al enviar el formulario. Por favor, intenta de nuevo más tarde.",
           confirmButtonColor: "#2563eb",
         });
-
-        console.error(err);
       }
     }
   };
@@ -152,15 +165,18 @@ export default function ContactFormComponent() {
               id="fullName"
               name="fullName"
               type="text"
+              maxLength={100}
+              pattern="[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]*"
               className="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
               placeholder="Tu nombre completo"
               value={form.fullName}
               onChange={handleChange}
               onBlur={handleBlur}
+              aria-required="true"
             />
             {touched.fullName && errors.fullName && (
               <div className="text-red-500 text-sm mt-2">
-                El nombre es requerido (mínimo 3 caracteres).
+                El nombre debe tener entre 3 y 100 caracteres, solo letras y espacios.
               </div>
             )}
           </div>
@@ -175,15 +191,17 @@ export default function ContactFormComponent() {
               id="email"
               name="email"
               type="email"
+              maxLength={70}
               className="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
               placeholder="tu@correo.com"
               value={form.email}
               onChange={handleChange}
               onBlur={handleBlur}
+              aria-required="true"
             />
             {touched.email && errors.email && (
               <div className="text-red-500 text-sm mt-2">
-                Ingresa un correo electrónico válido.
+                Ingresa un correo electrónico válido (máximo 70 caracteres).
               </div>
             )}
           </div>
@@ -198,15 +216,18 @@ export default function ContactFormComponent() {
               id="phone"
               name="phone"
               type="tel"
+              maxLength={10}
+              pattern="\d{10}"
               className="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400"
               placeholder="1234567890"
               value={form.phone}
               onChange={handleChange}
               onBlur={handleBlur}
+              aria-required="true"
             />
             {touched.phone && errors.phone && (
               <div className="text-red-500 text-sm mt-2">
-                Ingresa un teléfono válido (10 dígitos).
+                Ingresa un teléfono válido (exactamente 10 dígitos, solo números).
               </div>
             )}
           </div>
@@ -220,15 +241,17 @@ export default function ContactFormComponent() {
             <textarea
               id="message"
               name="message"
+              maxLength={1000}
               className="mt-2 block w-full p-4 border border-gray-200 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition duration-200 bg-gray-50 text-gray-900 placeholder-gray-400 h-40 resize-y"
               placeholder="Cuéntanos qué tipo de camioneta buscas..."
               value={form.message}
               onChange={handleChange}
               onBlur={handleBlur}
+              aria-required="true"
             />
             {touched.message && errors.message && (
               <div className="text-red-500 text-sm mt-2">
-                El mensaje es requerido (mínimo 10 caracteres).
+                El mensaje es requerido (mínimo 10 caracteres, máximo 1000).
               </div>
             )}
           </div>
@@ -240,17 +263,18 @@ export default function ContactFormComponent() {
               checked={form.condiciones}
               onChange={handleChange}
               onBlur={handleBlur}
+              aria-required="true"
             />
             <label htmlFor="condiciones" className="ml-2">
               Acepto los{" "}
+              <a href="/terminos" className="enlace-terminos text-blue-400">
+                Términos y Condiciones
+              </a>{" "}
+              y{" "}
+              <a href="/aviso" className="text-blue-400">
+                Aviso de Privacidad
+              </a>
             </label>
-            <a href="/terminos" className="enlace-terminos text-blue-400">
-              Términos y Condiciones
-            </a>
-            {" y "}
-            <a href="/aviso" className="text-blue-400">
-              Aviso de Privacidad
-            </a>
             {touched.condiciones && errors.condiciones && (
               <div className="text-red-500 text-sm mt-2">
                 Debes aceptar los términos y condiciones.
@@ -262,7 +286,6 @@ export default function ContactFormComponent() {
               ref={recaptchaRef}
               sitekey="6Ld8Z2srAAAAAC-LdwLTVr7JYf74B8DU44jzKkoM"
               onChange={handleRecaptcha}
-              className=""
             />
             {touched.recaptcha && errors.recaptcha && (
               <div className="text-red-500 text-sm mt-2">
